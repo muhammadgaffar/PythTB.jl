@@ -55,7 +55,11 @@ module PythTB
     function set_hop!(model::model,hop_amp,i,j,R = nothing; mode = "set",
                     allow_conjugate_pair = true)
 
-        model.model.set_hop(hop_amp,i-1,j-1,R .- 1,mode,allow_conjugate_pair)
+        if R == nothing
+            model.model.set_hop(hop_amp,i-1,j-1,R,mode,allow_conjugate_pair)
+        else
+            model.model.set_hop(hop_amp,i-1,j-1,R .- 1,mode,allow_conjugate_pair)
+        end
         model.hoppings = model.model._hoppings
     end
 
@@ -64,7 +68,7 @@ module PythTB
         model.site_energies = model.model._site_energies
     end
 
-    function k_path(model::model,kpts,nk; report = true)
+    function k_path(model::model,kpts,nk; report = false)
         return model.model.k_path(kpts,nk,report)
     end
 
