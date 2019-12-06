@@ -5,6 +5,7 @@ module PythTB
     export TB,tb_model,set_hop!,set_onsite!,k_path,solve_eig, get_DOS
     export setup_wf_array!, berry_phase, berry_flux, impose_pbc!, cut_piece
     export position_expectation, solve_on_grid!, position_hwf, make_supercell
+    export w90_model,dist_hop,bands_consistency
     export show,visualize
 
     const TB = PyNULL()
@@ -16,6 +17,7 @@ module PythTB
     mutable struct model
         model
         array
+        w90
         dim_k
         dim_r
         nspin
@@ -36,7 +38,7 @@ module PythTB
         else
             tb = TB.tb_model(dim_k,dim_r,lat,orb,per = per .- 1,nspin = nspin)
         end
-        tb = model(tb,0,0,0,0,0,0,0,0,0,0,0)
+        tb = model(tb,0,false,0,0,0,0,0,0,0,0,0,0)
         tb.dim_k = tb.model._dim_k
         tb.dim_r = tb.model._dim_r
         tb.nspin = tb.model._nspin
@@ -53,7 +55,7 @@ module PythTB
     function set_hop!(model::model,hop_amp,i,j,R = nothing; mode = "set",
                     allow_conjugate_pair = true)
 
-        model.model.set_hop(hop_amp,i-1,j-1,R,mode,allow_conjugate_pair)
+        model.model.set_hop(hop_amp,i-1,j-1,R .- 1,mode,allow_conjugate_pair)
         model.hoppings = model.model._hoppings
     end
 
@@ -122,7 +124,7 @@ module PythTB
 
     function cut_piece(mod::model,num,finite_dir;glue_edgs=false)
         finite_tb = mod.model.cut_piece(num,finite_dir-1,glue_edgs)
-        finite_tb = model(finite_tb,0,0,0,0,0,0,0,0,0,0,0)
+        finite_tb = model(finite_tb,0,false,0,0,0,0,0,0,0,0,0,0)
         finite_tb.dim_k = finite_tb.model._dim_k
         finite_tb.dim_r = finite_tb.model._dim_r
         finite_tb.nspin = finite_tb.model._nspin
@@ -150,7 +152,7 @@ module PythTB
 
     function make_supercell(mod::model,sc_red_lat;return_sc_vectors=false,to_home=true)
         sc_tb = mod.model.make_supercell(sc_red_lat,return_sc_vectors,to_home)
-        sc_tb = model(sc_tb,0,0,0,0,0,0,0,0,0,0,0)
+        sc_tb = model(sc_tb,0,false,0,0,0,0,0,0,0,0,0,0)
         sc_tb.dim_k = sc_tb.model._dim_k
         sc_tb.dim_r = sc_tb.model._dim_r
         sc_tb.nspin = sc_tb.model._nspin
@@ -164,5 +166,24 @@ module PythTB
         return sc_tb
     end
 
+    function w90_model(path,prefix; zero_energy = 0.0, min_hopping_norm = nothing,
+                    max_distance=nothing, ignorable_imaginary_part=nothing)
+
+        w90_init = TB.w90(path,prefix)
+        w90_tb = w90_init.model(zero_energy,min_hopping_norm,
+                                max_distance,ignorable_imaginary_part)
+        w90_tb = model(w90_tb,0,w90_init,0,0,0,0,0,0,0,0,0,0)
+        return w90_tb
+    end
+
+    function dist_hop(model::model)
+        dist, ham = model.w90.dist_hop()
+        return dist, ham
+    end
+
+    function bands_consistency(model::model)
+        kpts, energy = model.w90.w90_bands_consistency()
+        return kpts, energy
+    end
 
 end # module PythTB
