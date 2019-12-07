@@ -1,11 +1,11 @@
 module PythTB
     using PyCall
-    using StatsBase
 
-    export TB,tb_model,set_hop!,set_onsite!,k_path,solve_eig, get_DOS
+    export TB,tb_model,set_hop!,set_onsite!,k_path,solve_eig, hamiltonian
     export setup_wf_array!, berry_phase, berry_flux, impose_pbc!, cut_piece
     export position_expectation, solve_on_grid!, position_hwf, make_supercell
     export w90_model,dist_hop,bands_consistency
+    export calc_DOS
     export show,visualize
 
     const TB = PyNULL()
@@ -30,6 +30,7 @@ module PythTB
         hoppings
     end
 
+    include("calc.jl")
     include("visualize.jl")
 
     function tb_model(dim_k,dim_r,lat,orb; per = nothing,nspin = 1)
@@ -72,6 +73,10 @@ module PythTB
         return model.model.k_path(kpts,nk,report)
     end
 
+    function hamiltonian(model::model,k)
+        return model.model._gen_ham(k)
+    end
+
     function solve_eig(model::model,k_list = nothing; eig_vec = false)
         if k_list != nothing
             if length(k_list) <= 3
@@ -82,28 +87,6 @@ module PythTB
         else
             model.model.solve_all(k_list,eig_vectors = eig_vec)
         end
-    end
-
-    function get_DOS(model::model,kmesh=75,wmesh=100;window=[-4,4],finite=false)
-        meshEnergy = LinRange(window[1],window[2],wmesh)
-        w = 0.5 * (meshEnergy[1:end-1] .+ meshEnergy[2:end])
-
-        kpts = []
-        for i in 1:kmesh, j in 1:kmesh
-            k = [i/kmesh, j/kmesh]
-            push!(kpts,k)
-        end
-
-        if finite == true
-            eigvals = solve_eig(model)
-        else
-            eigvals = solve_eig(model,kpts)
-        end
-
-        hist = fit(Histogram,vec(eigvals),meshEnergy)
-        dos  = hist.weights / ( size(eigvals,1) * size(eigvals,2) )
-
-        return w,dos
     end
 
     function setup_wf_array!(model::model,mesh)
