@@ -96,17 +96,29 @@ module PythTB
     function berry_phase(model::model,occ,dir=nothing;
                         contin=true,berry_evals=false)
 
-        return model.array.berry_phase(occ,dir,contin,berry_evals)
+        occ = Int.(occ)
+        if dir == nothing
+            return model.array.berry_phase(occ .-1,dir,contin,berry_evals)
+        else
+            dir = Int.(dir)
+            return model.array.berry_phase(occ .-1,dir .-1,contin,berry_evals)
+        end
     end
 
-    function berry_flux(model::model,occ,dirs=nothing;
+    function berry_flux(model::model,occ,dir=nothing;
                         individual_phases=false)
+        occ = Int.(occ)
+        if dir == nothing
+            return model.array.berry_flux(occ .-1,dir,individual_phases = individual_phases)
+        else
+            dir = Int.(dir)
+            return model.array.berry_flux(occ .-1,dir .-1,individual_phases = individual_phases)
+        end
 
-        return model.array.berry_flux(occ,dirs,individual_phases = individual_phases)
     end
 
     function impose_pbc!(model::model,mesh_dir,k_dir)
-        model.array.impose_pbc(mesh_dir,k_dir)
+        model.array.impose_pbc(mesh_dir .-1,k_dir .-1)
     end
 
     function cut_piece(mod::model,num,finite_dir;glue_edgs=false)
