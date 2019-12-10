@@ -2,39 +2,39 @@ using PyPlot
 import Base: show
 
 function show(io::IO, model::model)
-    println("Tight-binding model summary")
-    println("===========================================================")
-    println("k-space dimension = ", model.dim_k)
-    println("r-space dimension = ", model.dim_r)
-    println("periodic direction = ", model.per)
-    println("number of orbitals = ", model.norb)
-    println("number of electronic states = ", model.nstates)
-    println("------------------------------------------")
-    println("lattice vectors:")
+    println(io,"Tight-binding model summary")
+    println(io,"===========================================================")
+    println(io,"k-space dimension = ", model.dim_k)
+    println(io,"r-space dimension = ", model.dim_r)
+    println(io,"periodic direction = ", model.per)
+    println(io,"number of orbitals = ", model.norb)
+    println(io,"number of electronic states = ", model.nstates)
+    println(io,"------------------------------------------")
+    println(io,"lattice vectors:")
     for (i,o) in enumerate(model.latvec)
-        println("# â[$i] ==> ", round.(o,digits=4))
+        println(io,"# â[$i] ==> ", round.(o,digits=4))
     end
-    println("------------------------------------------")
-    println("position of orbitals:")
+    println(io,"------------------------------------------")
+    println(io,"position of orbitals:")
     for (i,o) in enumerate(model.orb)
-        println("# r[$i] ==> ", round.(o,digits=4))
+        println(io,"# r[$i] ==> ", round.(o,digits=4))
     end
-    println("------------------------------------------")
-    println("site energies:")
+    println(io,"------------------------------------------")
+    println(io,"site energies:")
     for (i,o) in enumerate(model.site_energies)
-        println("# ε[$i] ==> ", round(0,digits=4))
+        println(io,"# ε[$i] ==> ", round(0,digits=4))
     end
-    println("------------------------------------------")
-    println("hoppings:")
+    println(io,"------------------------------------------")
+    println(io,"hoppings:")
     if model.hoppings == 0 || model.hoppings == nothing
-        println("no hopping")
+        println(io,"no hopping")
     else
         for i in 1:size(model.hoppings,1)
             o = model.hoppings[i,:]
             if length(o) == 4
-                println("⟨$(o[2] + 1)|H|$(o[3] + 1)+$(o[4] .+ 1)⟩ = ", round.(complex(o[1]),digits=4))
+                println(io,"⟨$(o[2] + 1)|H|$(o[3] + 1)+$(o[4] .+ 1)⟩ = ", round.(complex(o[1]),digits=4))
             else
-                println("⟨$(o[2] + 1)|H|$(o[3] + 1)⟩ = ", round.(complex(o[1]),digits=4) )
+                println(io,"⟨$(o[2] + 1)|H|$(o[3] + 1)⟩ = ", round.(complex(o[1]),digits=4) )
             end
         end
     end
