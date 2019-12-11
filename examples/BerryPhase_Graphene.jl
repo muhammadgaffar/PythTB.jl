@@ -19,9 +19,9 @@ set_onsite!(gr,[-Δ,Δ])
 
 #set hop
 t = -1.0
-set_hop!(gr,t,1,2,[1,1])
-set_hop!(gr,t,2,1,[2,1])
-set_hop!(gr,t,2,1,[1,2])
+set_hop!(gr,t,1,2,[0,0])
+set_hop!(gr,t,2,1,[1,0])
+set_hop!(gr,t,2,1,[0,1])
 
 #summary of the models
 show(gr)

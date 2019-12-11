@@ -56,11 +56,7 @@ module PythTB
     function set_hop!(model::model,hop_amp,i,j,R = nothing; mode = "set",
                     allow_conjugate_pair = true)
 
-        if R == nothing
-            model.model.set_hop(hop_amp,i-1,j-1,R,mode,allow_conjugate_pair)
-        else
-            model.model.set_hop(hop_amp,i-1,j-1,R .- 1,mode,allow_conjugate_pair)
-        end
+        model.model.set_hop(hop_amp,i-1,j-1,R,mode,allow_conjugate_pair)
         model.hoppings = model.model._hoppings
     end
 

@@ -15,10 +15,10 @@ trestle = tb_model(dim_k,dim_r,lat,orb)
 #set hopping
 t1 = 0.8 + 0.6im
 t2 = 2.0
-set_hop!(trestle,t2,1,1,[2,1])
-set_hop!(trestle,t2,2,2,[2,1])
-set_hop!(trestle,t1,1,2,[1,1])
-set_hop!(trestle,t1,2,1,[2,1])
+set_hop!(trestle,t2,1,1,[1,0])
+set_hop!(trestle,t2,2,2,[1,0])
+set_hop!(trestle,t1,1,2,[0,0])
+set_hop!(trestle,t1,2,1,[1,0])
 
 #summary of the models
 show(trestle)

@@ -14,7 +14,7 @@ model1D = tb_model(dim_k,dim_r,lat,orb)
 
 #set hopping
 t = -1.0 #hopping amplitude
-set_hop!(model1D,t,1,1,[2]) #orbital 1 to another orbital 1
+set_hop!(model1D,t,1,1,[1]) #orbital 1 to another orbital 1
 
 #show summary of the model
 show(model1D)

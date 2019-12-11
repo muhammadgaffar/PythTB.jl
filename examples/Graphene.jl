@@ -1,4 +1,5 @@
 using PythTB
+using PyPlot
 
 #define lattice vectors for honeycomb lattice
 lat = [[1,0],[0.5,sqrt(3)/2]]
@@ -13,9 +14,9 @@ gr = tb_model(dim_k,dim_r,lat,orb)
 
 #set hopping
 t = -1.0
-set_hop!(gr,t,1,2,[1,1])
-set_hop!(gr,t,2,1,[2,1])
-set_hop!(gr,t,2,1,[1,2])
+set_hop!(gr,t,1,2,[0,0])
+set_hop!(gr,t,2,1,[1,0])
+set_hop!(gr,t,2,1,[0,1])
 
 #model summary
 show(gr)

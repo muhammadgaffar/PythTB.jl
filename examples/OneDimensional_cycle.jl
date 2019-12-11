@@ -22,9 +22,9 @@ model1d = tb_model(dim_k,dim_r,lat,orb)
 
 #set hop
 t = -1.0
-set_hop!(model1d,t,1,2,[1])
-set_hop!(model1d,t,2,3,[1])
-set_hop!(model1d,t,3,1,[2])
+set_hop!(model1d,t,1,2,[0])
+set_hop!(model1d,t,2,3,[0])
+set_hop!(model1d,t,3,1,[1])
 
 #initialize figure for onsite and band
 using PyPlot

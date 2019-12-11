@@ -18,10 +18,10 @@ set_onsite!(CBoard,[-Δ,Δ])
 
 #set hopping
 t = -0.6
+set_hop!(CBoard,t,2,1,[0,0])
+set_hop!(CBoard,t,2,1,[1,0])
+set_hop!(CBoard,t,2,1,[0,1])
 set_hop!(CBoard,t,2,1,[1,1])
-set_hop!(CBoard,t,2,1,[2,1])
-set_hop!(CBoard,t,2,1,[1,2])
-set_hop!(CBoard,t,2,1,[2,2])
 
 #summary of the models
 show(CBoard)

@@ -11,9 +11,9 @@ function set_model(t,Δ,λ)
     #the model
     model = tb_model(1,1,lat,orb)
     #set hopping
-    set_hop!(model,t,1,2,[1])
-    set_hop!(model,t,2,3,[1])
-    set_hop!(model,t,3,1,[2])
+    set_hop!(model,t,1,2,[0])
+    set_hop!(model,t,2,3,[0])
+    set_hop!(model,t,3,1,[1])
     #set onsite
     onsite_0 = -Δ*cos(2π * (λ - 0))
     onsite_1 = -Δ*cos(2π * (λ - 1/3))
