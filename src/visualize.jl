@@ -32,7 +32,7 @@ function show(io::IO, model::model)
         for i in 1:size(model.hoppings,1)
             o = model.hoppings[i,:]
             if length(o) == 4
-                println(io,"⟨$(o[2] + 1)|H|$(o[3] + 1)+$(o[4] .+ 1)⟩ = ", round.(complex(o[1]),digits=4))
+                println(io,"⟨$(o[2] + 1)|H|$(o[3] + 1)+$(o[4])⟩ = ", round.(complex(o[1]),digits=4))
             else
                 println(io,"⟨$(o[2] + 1)|H|$(o[3] + 1)⟩ = ", round.(complex(o[1]),digits=4) )
             end
