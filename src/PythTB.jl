@@ -1,5 +1,6 @@
 module PythTB
     using PyCall
+    using PyPlot
 
     export TB,tb_model,set_hop!,set_onsite!,k_path,solve_eig, hamiltonian
     export setup_wf_array!, berry_phase, berry_flux, impose_pbc!, cut_piece
@@ -46,9 +47,6 @@ module PythTB
 
     σ = pauli(σx,σy,σz)
 
-    include("calc.jl")
-    include("visualize.jl")
-
     function tb_model(dim_k,dim_r,lat,orb; per = nothing,nspin = 1)
         if per == nothing
             tb = TB.tb_model(dim_k,dim_r,lat,orb,per = per,nspin = nspin)
@@ -62,8 +60,8 @@ module PythTB
         tb.per   = tb.model._per .+ 1
         tb.norb  = tb.model._norb
         tb.nstates = tb.model._nsta
-        tb.latvec = lat
-        tb.orb   = orb
+        tb.latvec = tb.model._lat
+        tb.orb   = tb.model._orb
         tb.site_energies = tb.model._site_energies
         tb.hoppings = tb.model._hoppings
         return tb
@@ -142,8 +140,8 @@ module PythTB
         finite_tb.per   = finite_tb.model._per .+ 1
         finite_tb.norb  = finite_tb.model._norb
         finite_tb.nstates = finite_tb.model._nsta
-        finite_tb.latvec = mod.latvec
-        finite_tb.orb   = mod.orb
+        finite_tb.latvec = finite_tb.model._lat
+        finite_tb.orb   = finite_tb.model._orb
         finite_tb.site_energies = finite_tb.model._site_energies
         finite_tb.hoppings = finite_tb.model._hoppings
         return finite_tb
@@ -170,8 +168,8 @@ module PythTB
         sc_tb.per   = sc_tb.model._per .+ 1
         sc_tb.norb  = sc_tb.model._norb
         sc_tb.nstates = sc_tb.model._nsta
-        sc_tb.latvec = mod.latvec
-        sc_tb.orb   = mod.orb
+        sc_tb.latvec = sc_tb.model._lat
+        sc_tb.orb   = sc_tb.model._orb
         sc_tb.site_energies = sc_tb.model._site_energies
         sc_tb.hoppings = sc_tb.model._hoppings
         return sc_tb
@@ -197,5 +195,14 @@ module PythTB
         kpts, energy = model.w90.w90_bands_consistency()
         return kpts, energy
     end
+
+    function visualize(model::model,dir_first,dir_second=nothing;
+                        eig_dr=nothing,draw_hoppings=true,ph_color="black")
+        return model.model.visualize(dir_first - 1,dir_second - 1,
+                                    eig_dr,draw_hoppings,ph_color)
+    end
+
+    include("calc.jl")
+    include("visualize.jl")
 
 end # module PythTB

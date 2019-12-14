@@ -1,4 +1,3 @@
-using PyPlot
 import Base: show
 
 function show(io::IO, model::model)
@@ -11,12 +10,14 @@ function show(io::IO, model::model)
     println(io,"number of electronic states = ", model.nstates)
     println(io,"------------------------------------------")
     println(io,"lattice vectors:")
-    for (i,o) in enumerate(model.latvec)
+    for i in 1:size(model.latvec,1)
+        o = model.latvec[i,:]
         println(io,"# â[$i] ==> ", round.(o,digits=4))
     end
     println(io,"------------------------------------------")
     println(io,"position of orbitals:")
-    for (i,o) in enumerate(model.orb)
+    for i in 1:size(model.orb,1)
+        o = model.orb[i,:]
         println(io,"# r[$i] ==> ", round.(o,digits=4))
     end
     println(io,"------------------------------------------")
@@ -60,8 +61,4 @@ end
 
 function show(io::IO,pauli::pauli)
     println(io,"Pauli matrices (x,y,z)")
-end
-
-function visualize(model::model,dir_first,dir_second=nothing;eig_dr=nothing,draw_hoppings=true,ph_color="black")
-    return model.model.visualize(dir_first - 1,dir_second - 1,eig_dr,draw_hoppings,ph_color)
 end
