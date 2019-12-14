@@ -28,6 +28,10 @@ module PythTB
         orb
         site_energies
         hoppings
+
+        model(model) = new(model,0,false,
+                            0,0,0,0,0,
+                            0,0,0,0,0)
     end
 
     include("calc.jl")
@@ -39,7 +43,7 @@ module PythTB
         else
             tb = TB.tb_model(dim_k,dim_r,lat,orb,per = per .- 1,nspin = nspin)
         end
-        tb = model(tb,0,false,0,0,0,0,0,0,0,0,0,0)
+        tb = model(tb)
         tb.dim_k = tb.model._dim_k
         tb.dim_r = tb.model._dim_r
         tb.nspin = tb.model._nspin
@@ -119,7 +123,7 @@ module PythTB
 
     function cut_piece(mod::model,num,finite_dir;glue_edgs=false)
         finite_tb = mod.model.cut_piece(num,finite_dir-1,glue_edgs)
-        finite_tb = model(finite_tb,0,false,0,0,0,0,0,0,0,0,0,0)
+        finite_tb = model(finite_tb)
         finite_tb.dim_k = finite_tb.model._dim_k
         finite_tb.dim_r = finite_tb.model._dim_r
         finite_tb.nspin = finite_tb.model._nspin
@@ -147,7 +151,7 @@ module PythTB
 
     function make_supercell(mod::model,sc_red_lat;return_sc_vectors=false,to_home=true)
         sc_tb = mod.model.make_supercell(sc_red_lat,return_sc_vectors,to_home)
-        sc_tb = model(sc_tb,0,false,0,0,0,0,0,0,0,0,0,0)
+        sc_tb = model(sc_tb)
         sc_tb.dim_k = sc_tb.model._dim_k
         sc_tb.dim_r = sc_tb.model._dim_r
         sc_tb.nspin = sc_tb.model._nspin
@@ -167,7 +171,8 @@ module PythTB
         w90_init = TB.w90(path,prefix)
         w90_tb = w90_init.model(zero_energy,min_hopping_norm,
                                 max_distance,ignorable_imaginary_part)
-        w90_tb = model(w90_tb,0,w90_init,0,0,0,0,0,0,0,0,0,0)
+        w90_tb = model(w90_tb)
+        w90_tb.w90 = w90_init
         return w90_tb
     end
 
