@@ -6,6 +6,7 @@ module PythTB
     export position_expectation, solve_on_grid!, position_hwf, make_supercell
     export w90_model,dist_hop,bands_consistency
     export calc_DOS
+    export σ
     export show,visualize
 
     const TB = PyNULL()
@@ -33,6 +34,17 @@ module PythTB
                             0,0,0,0,0,
                             0,0,0,0,0)
     end
+
+    struct pauli
+        x
+        y
+        z
+    end
+    const σx = [0,1,0,0]
+    const σy = [0,0,1,0]
+    const σz = [0,0,0,1]
+
+    σ = pauli(σx,σy,σz)
 
     include("calc.jl")
     include("visualize.jl")
@@ -146,7 +158,7 @@ module PythTB
     end
 
     function position_hwf(model::model,evec,dir;hwf_evec=false,basis="orbital")
-        return model.model.position_hwf(evec,dir,hwf_evec,basis)
+        return model.model.position_hwf(evec,dir -1,hwf_evec,basis)
     end
 
     function make_supercell(mod::model,sc_red_lat;return_sc_vectors=false,to_home=true)

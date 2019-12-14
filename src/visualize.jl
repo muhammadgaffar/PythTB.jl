@@ -21,13 +21,30 @@ function show(io::IO, model::model)
     end
     println(io,"------------------------------------------")
     println(io,"site energies:")
-    for (i,o) in enumerate(model.site_energies)
-        println(io,"# ε[$i] ==> ", round(0,digits=4))
+    if model.nspin == 2
+        display(model.site_energies)
+    else
+        for (i,o) in enumerate(model.site_energies)
+            println(io,"# ε[$i] ==> ", round(o,digits=4))
+        end
     end
     println(io,"------------------------------------------")
     println(io,"hoppings:")
     if model.hoppings == 0 || model.hoppings == nothing
         println(io,"no hopping")
+    elseif model.nspin == 2
+        for i in 1:size(model.hoppings,1)
+            o = model.hoppings[i,:]
+            if length(o) == 4
+                println("⟨$(o[2] + 1)|H|$(o[3] + 1)+$(o[4])⟩ = ")
+                display(o[1])
+                println("")
+            else
+                println(io,"⟨$(o[2] + 1)|H|$(o[3] + 1)⟩ = ")
+                display(o[1])
+                println("")
+            end
+        end
     else
         for i in 1:size(model.hoppings,1)
             o = model.hoppings[i,:]
@@ -38,6 +55,11 @@ function show(io::IO, model::model)
             end
         end
     end
+
+end
+
+function show(io::IO,pauli::pauli)
+    println(io,"Pauli matrices (x,y,z)")
 end
 
 function visualize(model::model,dir_first,dir_second=nothing;eig_dr=nothing,draw_hoppings=true,ph_color="black")
