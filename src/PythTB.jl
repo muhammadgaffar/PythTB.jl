@@ -183,6 +183,16 @@ module PythTB
                                 max_distance,ignorable_imaginary_part)
         w90_tb = model(w90_tb)
         w90_tb.w90 = w90_init
+        w90_tb.dim_k = w90_tb.model._dim_k
+        w90_tb.dim_r = w90_tb.model._dim_r
+        w90_tb.nspin = w90_tb.model._nspin
+        w90_tb.per   = w90_tb.model._per .+ 1
+        w90_tb.norb  = w90_tb.model._norb
+        w90_tb.nstates = w90_tb.model._nsta
+        w90_tb.latvec = w90_tb.model._lat
+        w90_tb.orb   = w90_tb.model._orb
+        w90_tb.site_energies = w90_tb.model._site_energies
+        w90_tb.hoppings = w90_tb.model._hoppings
         return w90_tb
     end
 
