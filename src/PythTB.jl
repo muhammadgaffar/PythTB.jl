@@ -3,6 +3,7 @@ module PythTB
     using PyPlot
 
     export TB,tb_model,set_hop!,set_onsite!,k_path,solve_eig, hamiltonian
+    export val_to_block, remove_orb, k_uniform_mesh, position_matrix
     export setup_wf_array!, berry_phase, berry_flux, impose_pbc!, cut_piece
     export position_expectation, solve_on_grid!, position_hwf, make_supercell
     export w90_model,dist_hop,bands_consistency
@@ -77,6 +78,34 @@ module PythTB
     function set_onsite!(model::model,en,ind_i = nothing; mode = "set")
         model.model.set_onsite(en,ind_i,mode = mode)
         model.site_energies = model.model._site_energies
+    end
+
+    function val_to_block(model::model,val)
+        return model.model._val_to_block(val)
+    end
+
+    function remove_orb(mod::model,to_remove)
+        tb = mod.model.remove_orb(to_remove .- 1)
+        tb = model(tb)
+        tb.dim_k = tb.model._dim_k
+        tb.dim_r = tb.model._dim_r
+        tb.nspin = tb.model._nspin
+        tb.per   = tb.model._per .+ 1
+        tb.norb  = tb.model._norb
+        tb.nstates = tb.model._nsta
+        tb.latvec = tb.model._lat
+        tb.orb   = tb.model._orb
+        tb.site_energies = tb.model._site_energies
+        tb.hoppings = tb.model._hoppings
+        return tb
+    end
+
+    function k_uniform_mesh(model::model,mesh_size)
+        return model.model.k_uniform_mesh(mesh_size)
+    end
+
+    function position_matrix(model::model,eigvec,dir)
+        return model.model.position_matrix(eigvec,dir .- 1)
     end
 
     function k_path(model::model,kpts,nk; report = false)
