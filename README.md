@@ -1,9 +1,6 @@
 # PythTB.jl
 
-[![Build Status](https://travis-ci.org/muhammadgaffar/PythTB.jl.svg?branch=master)](https://travis-ci.org/muhammadgaffar/PythTB.jl)
-[![Coverage Status](https://coveralls.io/repos/github/muhammadgaffar/PythTB.jl/badge.svg?branch=master)](https://coveralls.io/github/muhammadgaffar/PythTB.jl?branch=master)
-
-PythTB.jl is Julia Wrapper for PythTB 1.7 Package in Python.
+PythTB.jl is Julia Wrapper for PythTB 1.7 Package in Pytho via PyCall.jl
 
 ## Installation
 Make sure your current python environment is Anaconda, then install
@@ -40,12 +37,12 @@ This is example usage in honeycomb lattice
 using PythTB
 
 #define lattice vectors for honeycomb lattice
-lat = [ 1       0;              # lattice vector one
-        0.5     sqrt(3)/2]]     # lattice vector two
+lat = [ 1.0  0.0;            # lattice vector one
+        0.5  sqrt(3)/2]]     # lattice vector two
 
 #put atom in reduced coordinate of lattice vector
-atom = [ 1/3 1/3; # atom one
-        2/3 2/3]  # atom two
+atom = [ 1/3 1/3;  # atom one
+         2/3 2/3]  # atom two
 
 # honeycomb TightBinding
 dim_k = 2 # dimension of k-space
@@ -70,7 +67,6 @@ show(gr)
 
 # generate path in kspace (symmetry point) of honeycomb lattice
 path = [[0,0],[2/3,1/3],[0.5,0.5],[0,0]]
-labels = [L"\Gamma","K","M",L"\Gamma"]
 
 #solve band
 nk = 201
@@ -82,12 +78,18 @@ using Plots
 plot(k_dist,eigvals')
 ```
 
+See more advanced examples in 'examples' folder.
+
 ## Acknowledgement
 All credits are goes to PythTB developer:
 - Sinisa Coh (University of California at Riverside)
 - David Vanderbilt (Rutgers University)
 
 ## TO DO
-- function documentation
+- documentation
 - remake visualization of the TB model in Plots.jl (visualize.jl)
 - transport calculation (calc.jl), i.e dc conductivity, optical conductivity
+
+## Goal
+PythTB.jl aims for fast, easy, and rich calculation of physical observable
+based on Tight Binding approach.
