@@ -1,5 +1,8 @@
+using Plots
 
 import Base: show
+
+export show, visualize_2d
 
 function show(io::IO, model::model)
     println(io,"Tight-binding model summary")
@@ -102,7 +105,7 @@ function visualize_2d(model::model,dir_first,dir_second;
     end
 
     #initialize plot
-    p = plot(framestyle=:box,legend=false)
+    p = plot(legend=false)
     linestyle = :dash
 
     #draw latvec

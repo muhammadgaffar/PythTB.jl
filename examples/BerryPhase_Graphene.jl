@@ -1,12 +1,13 @@
 using PythTB
+using Plots
 
 #Compute berry phase around dirac cone in graphene
 
 #hexagonal lattice vectors
-lat = [[1.0,0.0],[0.5,sqrt(3.0)/2.0]]
+lat = [1 0; 0.5 sqrt(3.0)/2.0]
 
 #put orbital
-orb = [[1/3,1/3],[2/3,2/3]]
+orb = [1/3 1/3; 2/3 2/3]
 
 #generate the model
 dim_k = 2
@@ -83,14 +84,11 @@ println("for band 2 equals =", berry_flux(gr,[2]))
 println("for both bands equals =", berry_flux(gr,[1,2]))
 
 #plot berry phase
-using PyPlot
 plaq = berry_flux(gr,[1],individual_phases=true)
 
-fig, ax = subplots(figsize=(6,4))
-ax.imshow(plaq',origin="lower",
-        extent=(kpts[1,1,1],kpts[50,1,1,],
-                kpts[1,1,2],kpts[1,50,1]))
-ax.set_title("Berry curvature near Dirac Cone")
-ax.set_xlabel(L"$k_x$")
-ax.set_ylabel(L"$k_y$")
-fig.savefig("examples/cone_phases.pdf")
+fig = contour(plaq,fill=true)
+title!(fig,"Berry curvature near Dirac Cone")
+xlabel!(fig,"kx")
+ylabel!(fig,"ky")
+
+display(fig)

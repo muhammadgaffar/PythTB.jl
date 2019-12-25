@@ -1,5 +1,6 @@
 module PythTB
     using PyCall
+    using Requires
 
     export TB,tb_model,set_hop!,set_onsite!,k_path,solve_eig, hamiltonian
     export val_to_block, remove_orb, k_uniform_mesh, position_matrix
@@ -8,14 +9,14 @@ module PythTB
     export w90_model,dist_hop,bands_consistency
     export calc_DOS
     export σ
-    export show,visualize_2d
 
     const TB = PyNULL()
 
     function __init__()
         copy!(TB, pyimport_conda("pythtb", "pythtb"))
+        @require Plots="91a5bcdd-55d7-5caf-9e0b-520d859cae80" include("visualize.jl")
     end
-
+    
     mutable struct model
         model
         array
@@ -45,7 +46,7 @@ module PythTB
     const σy = [0,0,1,0]
     const σz = [0,0,0,1]
 
-    σ = pauli(σx,σy,σz)
+    const σ = pauli(σx,σy,σz)
 
     function tb_model(dim_k,dim_r,lat,orb; per = nothing,nspin = 1)
         if per == nothing
@@ -235,6 +236,5 @@ module PythTB
     end
 
     include("calc.jl")
-    include("visualize.jl")
 
 end # module PythTB

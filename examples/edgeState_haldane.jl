@@ -1,12 +1,12 @@
 using PythTB
-using PyPlot
+using Plots
 
 #finite haldane model with periodic and non-periodic boundary condition
 
 #hexagonal lattice
-lat = [[1,0],[0.5,sqrt(3)/2]]
+lat = [1 0; 0.5 sqrt(3)/2]
 #put orbital
-orb = [[1/3,1/3],[2/3,2/3]]
+orb = [1/3 1/3; 2/3 2/3]
 
 #generate model
 dim_k,dim_r = (2,2)
@@ -49,12 +49,11 @@ eigvals_finite,eigvecs_finite = solve_eig(finite_haldane,eig_vec=true)
 ed= Int(finite_haldane.norb/2)
 
 #visualize the edge state
-fig,ax = visualize(finite_haldane,1,2,eig_dr=eigvecs_finite[ed,:],
+fig = visualize_2d(finite_haldane,1,2,eig_dr=eigvecs_finite[ed,:],
                     draw_hoppings=false)
-ax.set_title("Edge state for finite model without periodic direction")
-ax.set_xlabel("x coordinate")
-ax.set_ylabel("y coordinate")
-fig.savefig("examples/edge_state_noPBC.pdf")
+title!(fig,"Edge state for finite model without periodic direction")
+xlabel!(fig,"x coordinate")
+ylabel!(fig,"y coordinate")
 
 #cut model to make it as finite model along direction x and y
 #with no periodic boundary along y, just x
@@ -70,9 +69,8 @@ eigvals_finite,eigvecs_finite = solve_eig(finite_haldane,eig_vec=true)
 ed= Int(finite_haldane.norb/2)
 
 #visualize the edge state
-fig,ax = visualize(finite_haldane,1,2,eig_dr=eigvecs_finite[ed,:],
+fig = visualize_2d(finite_haldane,1,2,eig_dr=eigvecs_finite[ed,:],
                     draw_hoppings=false)
-ax.set_title("Edge state for finite model without periodic direction")
-ax.set_xlabel("x coordinate")
-ax.set_ylabel("y coordinate")
-fig.savefig("examples/edge_state_halfPBC.pdf")
+title!(fig,"Edge state for finite model without periodic direction")
+xlabel!(fig,"x coordinate")
+ylabel!(fig,"y coordinate")
