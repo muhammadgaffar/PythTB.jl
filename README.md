@@ -1,14 +1,15 @@
 # PythTB.jl
 
-PythTB.jl is Julia Wrapper for PythTB 1.7 Package in Pytho via PyCall.jl
+PythTB.jl is Julia Wrapper for PythTB 1.7.2 Package in Python via PyCall.
 
 ## Installation
-Make sure your current python environment is Anaconda, then install
-PythTB python package first
+Make sure your current python environment is Anaconda, then install PythTB python package first.
 
+Open you shell
 ```
 pip install pythtb --upgrade
 ```
+
 then open your julia REPL, add PythTB.jl package
 ```julia
 ] add https://github.com/muhammadgaffar/PythTB.jl
@@ -66,7 +67,7 @@ set_hop!(gr,t,2,1,[0,1])
 show(gr)
 
 # generate path in kspace (symmetry point) of honeycomb lattice
-path = [[0,0],[2/3,1/3],[0.5,0.5],[0,0]]
+path = [0 0; 2/3 1/3; 0.5 0.5; 0 0]
 
 #solve band
 nk = 201
@@ -87,7 +88,6 @@ All credits are goes to PythTB developer:
 
 ## TO DO
 - documentation
-- remake visualization of the TB model in Plots.jl (visualize.jl)
 - transport calculation (calc.jl), i.e dc conductivity, optical conductivity
 
 ## Goal

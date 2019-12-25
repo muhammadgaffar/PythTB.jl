@@ -1,6 +1,5 @@
 module PythTB
     using PyCall
-    using PyPlot
 
     export TB,tb_model,set_hop!,set_onsite!,k_path,solve_eig, hamiltonian
     export val_to_block, remove_orb, k_uniform_mesh, position_matrix
@@ -9,7 +8,7 @@ module PythTB
     export w90_model,dist_hop,bands_consistency
     export calc_DOS
     export σ
-    export show,visualize
+    export show,visualize_2d
 
     const TB = PyNULL()
 
@@ -233,12 +232,6 @@ module PythTB
     function bands_consistency(model::model)
         kpts, energy = model.w90.w90_bands_consistency()
         return kpts, energy
-    end
-
-    function visualize(model::model,dir_first,dir_second=nothing;
-                        eig_dr=nothing,draw_hoppings=true,ph_color="black")
-        return model.model.visualize(dir_first - 1,dir_second - 1,
-                                    eig_dr,draw_hoppings,ph_color)
     end
 
     include("calc.jl")
