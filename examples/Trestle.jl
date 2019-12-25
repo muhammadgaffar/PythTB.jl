@@ -2,10 +2,10 @@ using PythTB
 using PyPlot
 
 #define lattice vectors
-lat = [[2.0,0.0],[0.0,1.0]]
+lat = [2 0; 0 1]
 
 #put orbital position
-orb = [[0.0,0.0],[0.5,1.0]]
+orb = [0 0; 0.5 1]
 
 #trestle model
 dim_k = 1 # only 1 direction that periodic
@@ -24,11 +24,10 @@ set_hop!(trestle,t1,2,1,[1,0])
 show(trestle)
 
 #visualize the lattice
-fig, ax = visualize(trestle,1,2)
-ax.set_title("Trestle Lattice")
-ax.set_xlabel("X")
-ax.set_ylabel("Y")
-fig.savefig("examples/Trestle Lattice.pdf")
+fig = visualize_2d(trestle,1,2)
+title!(fig,"Trestle Lattice")
+xlabel!(fig,"X")
+ylabel!(fig,"Y")
 
 #calculate energy
 nk = 201
@@ -36,17 +35,13 @@ k_vec,k_dist,k_node = k_path(trestle,"fullc",nk)
 eigvals = solve_eig(trestle,k_vec)
 
 #plot band
-fig, ax = subplots(figsize=(6,4))
-ax.plot(k_dist,eigvals')
+fig = plot(framestyle=:box,legend=false)
+plot!(fig,k_dist,eigvals')
 
-labels = [L"-\pi","0",L"\pi"]
-ax.set_title("Trestle band structure")
-ax.set_ylabel("Band Energy (eV)")
-ax.set_xlabel("Path in K-space")
-ax.set_xticks(k_node)
-ax.set_xticklabels(labels)
-ax.set_xlim(k_node[1],k_node[end])
-for k in k_node
-    ax.axvline(x = k, linewidth = 0.5, color = "k")
-end
-fig.savefig("examples/Trestle_Band.pdf")
+labels = ["-\\pi","0","\\pi"]
+title!(fig,"Trestle band structure")
+ylabel!(fig,"Band Energy (eV)")
+xlabel!(fig,"Path in K-space")
+xticks!(fig,k_node,labels)
+xlims!(fig,(k_node[1],k_node[end]))
+vline!(fig,k_node,lw=0.4,alpha=0.5,color="black")

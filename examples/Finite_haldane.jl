@@ -1,5 +1,5 @@
 using PythTB
-using PyPlot
+using Plots
 
 #finite haldane model with periodic and non-periodic boundary condition
 
@@ -48,22 +48,19 @@ eigvals_finite = solve_eig(finite_haldane)
 #plot DOS
 w,DOS = calc_DOS(finite_haldane,finite=true)
 
-fig,ax = subplots(figsize=(6,4))
-ax.plot(w,DOS,"-o")
-ax.set_ylim(0,maximum(DOS))
+fig = plot(w,DOS)
+ylims!(fig,(0,maximum(DOS)))
 
-ax.set_title("Finite Haldane model without PBC")
-ax.set_xlabel("Energy")
-ax.set_ylabel("Density of state")
-fig.savefig("examples/DOS_finiteHaldane_noPBC.pdf")
-
+title!(fig,"Finite Haldane model without PBC")
+xlabel!(fig,"Energy")
+ylabel!(fig,"Density of state")
+display(fig)
 
 #visualize the finite model
-fig,ax = visualize(finite_haldane,1,2)
-ax.set_title("Finite model of haldane (20 x 20)")
-ax.set_ylabel("Y")
-ax.set_ylabel("X")
-fig.savefig("examples/finite_haldaneLattice.pdf")
+fig2 = visualize_2d(finite_haldane,1,2)
+title!(fig2,"Finite model of haldane (20 x 20)")
+ylabel!(fig,"Y")
+xlabel!(fig,"X")
 
 #cut model to make it as finite model along direction x and y
 #with periodic boundary
@@ -78,11 +75,10 @@ eigvals_finite = solve_eig(finite_haldane)
 #plot DOS
 w,DOS = calc_DOS(finite_haldane,finite=true)
 
-fig,ax = subplots(figsize=(6,4))
-ax.plot(w,DOS,"-o")
-ax.set_ylim(0,maximum(DOS))
+fig = plot(w,DOS)
+ylims!(fig,(0,maximum(DOS)))
 
-ax.set_title("Finite Haldane model with PBC")
-ax.set_xlabel("Energy")
-ax.set_ylabel("Density of state")
-fig.savefig("examples/DOS_finiteHaldane_PBC.pdf")
+title!(fig,"Finite Haldane model with PBC")
+xlabel!(fig,"Energy")
+ylabel!(fig,"Density of state")
+display(fig)

@@ -1,11 +1,10 @@
 using PythTB
-using PyPlot
 
 #define lattice vectors for honeycomb lattice
-lat = [[1,0],[0.5,sqrt(3)/2]]
+lat = [1 0; 0.5 sqrt(3)/2]
 
 #put orbital
-orb = [[1/3,1/3],[2/3,2/3]]
+orb = [1/3 1/3; 2/3 2/3]
 
 #graphene model
 dim_k = 2
@@ -22,8 +21,8 @@ set_hop!(gr,t,2,1,[0,1])
 show(gr)
 
 #path in kspace (symmetry point)
-path = [[0,0],[2/3,1/3],[0.5,0.5],[0,0]]
-labels = [L"\Gamma","K","M",L"\Gamma"]
+path = [0 0;2/3 1/3; 0.5 0.5; 0 0]
+labels = ["\\Gamma","K","M","\\Gamma"]
 
 #solve band
 nk = 201
@@ -31,16 +30,12 @@ k_vec,k_dist,k_node = k_path(gr,path,nk)
 eigvals = solve_eig(gr,k_vec)
 
 #plot band
-fig, ax = subplots(figsize=(6,4))
-ax.plot(k_dist,eigvals')
+fig = plot(framestyle=:box,legend=false)
+plot!(fig,k_dist,eigvals')
 
-ax.set_title("Graphene band structure")
-ax.set_ylabel("Band Energy (eV)")
-ax.set_xlabel("Path in K-space")
-ax.set_xticks(k_node)
-ax.set_xticklabels(labels)
-ax.set_xlim(k_node[1],k_node[end])
-for k in k_node
-    ax.axvline(x = k, linewidth = 0.5, color = "k")
-end
-fig.savefig("examples/Graphene_Band.pdf")
+title!(fig,"Graphene band structure")
+ylabel!(fig,"Band Energy (eV)")
+xlabel!(fig,"Path in K-space")
+xticks!(fig,k_node,labels)
+xlims!(fig,(k_node[1],k_node[end]))
+vline!(k_node,linealpha=0.2, c="black")

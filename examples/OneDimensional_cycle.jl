@@ -27,9 +27,9 @@ set_hop!(model1d,t,2,3,[0])
 set_hop!(model1d,t,3,1,[1])
 
 #initialize figure for onsite and band
-using PyPlot
-fig_onsite, ax_onsite = subplots(figsize=(6,4))
-fig_band, ax_band = subplots(figsize=(6,4))
+using Plots
+fig_onsite = plot(legend=false)
+fig_band = plot(framstyle=:box,legend=false)
 
 #perform the effect on change of onsite term
 path_steps = 31
@@ -57,14 +57,13 @@ for i in 1:path_steps
     for j in 1:nk
         model1d.array[j,i] = eigvec[:,j,:]
     end
-
     #plot onsite
-    ax_onsite.scatter(λ,onsite_0,c="r")
-    ax_onsite.scatter(λ,onsite_1,c="g")
-    ax_onsite.scatter(λ,onsite_2,c="b")
+    scatter!(fig_onsite,[λ],[onsite_0],c="red")
+    scatter!(fig_onsite,[λ],[onsite_1],c="green")
+    scatter!(fig_onsite,[λ],[onsite_2],c="blue")
     #plot band
-    for k in 1:size(eigval,1)
-        ax_band.plot(k_dist,eigval[k,:],"k-",linewidth=2.0)
+    for k in size(eigval,1)
+        plot!(fig_band,k_dist,eigval[k,:],c="black",lw=2)
     end
 end
 
@@ -79,28 +78,27 @@ phase = berry_phase(model1d,[1],1)
 wann_center = phase ./ 2π
 
 #plot wannier
-fig_wann, ax_wann = subplots(figsize=(6,4))
-ax_wann.plot(λs,wann_center,"ko-")
+fig_wann = plot(legend=false)
+plot!(fig_wann,λs,wann_center,marker=:circle)
 
 #compute berry flux (integrated curvature)
 final = berry_flux(model1d,[1])
 println("Berry flux in k-λ space = ", final)
 
 #onsite figure
-ax_onsite.set_title("Onsite energy for all three orbitals")
-ax_onsite.set_xlabel("λ")
-ax_onsite.set_ylabel("Onsite terms")
-ax_onsite.set_xlim(0,1)
-fig_onsite.savefig("examples/3site_onsite.pdf")
+title!(fig_onsite,"Onsite energy for all three orbitals")
+xlabel!(fig_onsite,"\\lambda")
+ylabel!(fig_onsite,"Onsite terms")
+xlims!(fig_onsite,(0,1))
+
 #band figure
-ax_band.set_title("Band structure")
-ax_band.set_xlabel("Path in k-vector")
-ax_band.set_ylabel("Band energies")
-ax_band.set_xlim(0,1)
-fig_band.savefig("examples/3site_band.pdf")
+title!(fig_band,"Band structure")
+xlabel!(fig_band,"Path in k-vector")
+ylabel!(fig_band,"Band energies")
+xlims!(fig_band,(0,1))
+
 #wannier center figure
-ax_wann.set_title("Center of Wannier function")
-ax_wann.set_xlabel("Lambda parameter")
-ax_wann.set_ylabel("Center (reduced coordinate)")
-ax_wann.set_xlim(0,1)
-fig_wann.savefig("examples/3site_wann.pdf")
+title!(fig_wann,"Center of Wannier function")
+xlabel!(fig_wann,"Lambda parameter")
+ylabel!(fig_wann,"Center (reduced coordinate)")
+xlims!(fig_wann,(0,1))

@@ -1,15 +1,14 @@
 using PythTB
-using PyPlot
 
 #Define lattice vectors in 3d space
-lat = [[1,0,0],[0,1,0],[0,0,1]]
+lat = [1 0 0; 0 1 0; 0 0 1]
 
 #put atoms
 sq32 = sqrt(3) / 2
-orb = [[ 2/3 * sq32,  0,   0],
-       [-1/3 * sq32,  1/2, 0],
-       [-1/3 * sq32, -1/2, 0],
-       [ 0         ,  0,   1]]
+orb = [ 2/3 * sq32  0   0;
+       -1/3 * sq32  1/2 0;
+       -1/3 * sq32 -1/2 0;
+        0           0   1]
 
 #NH3 model
 dim_k = 0 #because of single molecule
@@ -36,11 +35,10 @@ show(NH3)
 eigvals = solve_eig(NH3)
 
 #plot orbital energy
-fig, ax = subplots(figsize=(6,4))
-ax.plot(eigvals,"o",markersize = 15)
-
-ax.set_title("Orbital Energy for NH3 Molecule")
-ax.set_xlabel("Orbital")
-ax.set_ylabel("Orbital Energy")
-ax.set_xticks([0,1,2,3])
-fig.savefig("examples/NH3_energy.pdf")
+using Plots
+fig = plot(legend=false)
+scatter!(fig,eigvals,marker=:circle,ms=6)
+title!(fig,"Orbital Energy for NH3 Molecule")
+xlabel!(fig,"Orbital")
+ylabel!(fig,"Orbital Energy")
+xticks!(fig,[1,2,3,4])

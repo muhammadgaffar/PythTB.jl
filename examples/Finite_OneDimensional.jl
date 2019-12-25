@@ -92,8 +92,8 @@ for iλ in 1:path_steps
 end
 
 #plot
-using PyPlot
-fig, ax = subplots()
+using Plots
+fig = plot(framestyle=:box,legend=false)
 
 for n in 1:num_orb
     # diminish the size of the ones on the borderline
@@ -104,11 +104,10 @@ for n in 1:num_orb
         size[i] = minimum([size[i],1])
         size[i] = maximum([size[i],0.1])
     end
-    ax.scatter(λs,ch_eval[n,:],edgecolors="none",s=size*6,c="k")
+    plot!(fig,λs,ch_eval[n,:],marker=:circle,markersize=size*2,c="black")
 end
 
-ax.set_title("Eigenenergies for finite chain of 3-site-model")
-ax.set_xlabel(L"Parameter $\lambda$")
-ax.set_ylabel("Energy")
-ax.set_xlim(0,1)
-fig.savefig("examples/3site_endstates.pdf")
+title!(fig,"Eigenenergies for finite chain of 3-site-model")
+xlabel!(fig,"Parameter\\lambda")
+ylabel!(fig,"Energy")
+xlims!(fig,(0,1))

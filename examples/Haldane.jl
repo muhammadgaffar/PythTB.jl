@@ -1,12 +1,11 @@
 using PythTB
-using PyPlot
 
 #Haldane model is graphene model with complex second neighbour hopping
 
-#hexagonal lattice
-lat = [[1,0],[0.5,sqrt(3)/2]]
+#define lattice vectors for honeycomb lattice
+lat = [1 0; 0.5 sqrt(3)/2]
 #put orbital
-orb = [[1/3,1/3],[2/3,2/3]]
+orb = [1/3 1/3; 2/3 2/3]
 
 #generate model
 dim_k,dim_r = (2,2)
@@ -36,12 +35,12 @@ set_hop!(haldane,t2c,1,1,[0,1])
 show(haldane)
 
 #visualize the model
-fig, ax = visualize(haldane,1,2)
-fig.savefig("examples/haldane_lattice.pdf")
+using Plots
+fig = visualize_2d(haldane,1,2)
 
 #generate k point along symmetry point
-path = [[0,0],[2/3,1/3],[0.5,0.5],[1/3,2/3],[0,0]]
-labels = [L"\Gamma","K","M",L"K^\prime",L"\Gamma"]
+path = [0 0; 2/3 1/3; 0.5 0.5; 1/3 2/3; 0 0]
+labels = ["\\Gamma","K","M","K'","\\Gamma"]
 
 #kpath
 nk = 201
@@ -50,30 +49,25 @@ k_vec,k_dist,k_node = k_path(haldane,path,nk)
 #solve eigenvalue
 eigvals = solve_eig(haldane,k_vec)
 
-#bandstructure
-fig,ax = subplots()
-ax.set_xlim(k_node[1],k_node[end])
-ax.set_xticks(k_node)
-ax.set_xticklabels(labels)
-for n in 1:length(k_node)
-    ax.axvline(x=k_node[n],linewidth=0.5,color="k")
-end
-ax.set_title("Haldane model band structure")
-ax.set_xlabel("Path in k-space")
-ax.set_ylabel("Band energy")
-
-#plot band
-ax.plot(k_dist,eigvals')
-fig.savefig("examples/haldane_band.pdf")
+#plot bandstructure
+fig = plot(framestyle=:box,legend=false)
+plot!(fig,k_dist,eigvals')
+xlims!(fig,(k_node[1],k_node[end]))
+xticks!(k_node,labels)
+vline!(k_node,linewidth=0.4,linealpha=0.5,c="black")
+title!(fig,"Haldane model band structure")
+xlabel!(fig,"Path in k-space")
+ylabel!(fig,"Band energy")
 
 #Density of state
-w,DOS = calc_DOS(haldane,nk)
+nk = 500
+wmesh = 175
+w,DOS = calc_DOS(haldane,nk,wmesh)
 
 #DOS plot
-fig,ax = subplots()
-ax.plot(w,DOS)
-ax.set_ylim(0,maximum(DOS))
-ax.set_title("Haldane model density of states")
-ax.set_xlabel("Band energy")
-ax.set_ylabel("Density of state")
-fig.savefig("examples/haldane_dos.pdf")
+fig = plot()
+plot!(fig,w,DOS)
+ylims!(fig,(0,maximum(DOS)))
+title!(fig,"Haldane model density of states")
+xlabel!(fig,"Band energy")
+ylabel!(fig,"Density of state")

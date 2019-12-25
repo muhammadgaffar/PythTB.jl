@@ -1,5 +1,4 @@
 using PythTB
-using PyPlot
 
 # Calculates Berry phases for the Haldane model and compares it
 # to the hybrid Wannier centers for a ribbon of the Haldane model.
@@ -10,9 +9,9 @@ using PyPlot
 # along direction 1.
 
 #hexagonal lattice
-lat = [[1,0],[0.5,sqrt(3)/2]]
+lat = [1 0; 0.5 sqrt(3)/2]
 #put orbital
-orb = [[1/3,1/3],[2/3,2/3]]
+orb = [1/3 1/3; 2/3 2/3]
 
 #generate model
 dim_k,dim_r = (2,2)
@@ -52,7 +51,7 @@ phi_1 = berry_phase(haldane,[1],2,contin=true)
 ribbon = cut_piece(haldane,nky,2,glue_edgs=false)
 #generate kpoint along periodic direction (kx)
 k_vec,k_dist,k_node = k_path(ribbon,"full",nkx)
-k_label = [L"$0$",L"\pi",L"2\pi"]
+k_label = ["0","\\pi","2\\pi"]
 
 #solve ribbon model
 rib_eval,rib_evec = solve_eig(ribbon,k_vec,eig_vec=true)
@@ -71,43 +70,36 @@ end
 
 # plot expectation value of position operator for states in the ribbon
 # and hybrid Wannier function centers
-fig, (ax1, ax2) = subplots(2,1,figsize=(8,10))
+fig = plot(framestyle=:box,legend=false)
 
 # plot bandstructure of the ribbon
-for n in 1:size(rib_eval,1)
-  ax1.plot(k_dist,rib_eval[n,:],c="k", zorder=-50)
-end
+plot!(fig,k_dist,rib_eval',c="black")
 
 # color bands according to expectation value of y operator
 # (red=top, blue=bottom)
 for i in 1:size(rib_evec,2)
-  global s
   # get expectation value of the position operator for states at i-th kpoint
   pos_exp = position_expectation(ribbon,rib_evec[:,i,:],2)
   # plot states according to the expectation value
-  s = ax1.scatter(ones(size(rib_eval,1)) .* k_vec[i], rib_eval[:,i], c=pos_exp,
-                s=30,marker="o", cmap="coolwarm", edgecolors="none", vmin=0.0,
-                vmax=nky, zorder=-100)
+  scatter!(fig,ones(size(rib_eval,1)) .* k_vec[i], rib_eval[:,i],
+          ms = 2, zcolor = pos_exp, m =(:coolwarm,0.3), alpha = 0.4, lab = "grad")
 end
 
-#color scale
-fig.colorbar(s,nothing,ax1,ticks=[0,nky])
 
 # plot Fermi energy
-ax1.axhline(0,c="g",zorder=-200)
+hline!(fig,[0],c="black",lw=0.2,ls=:dash)
 
 # vertical lines show crossings of surface bands with Fermi energy
-for ax in (ax1,ax2)
-  for i in jump_k
-    ax.axvline(x=(k_vec[i]+k_vec[i+1])/2.0, linewidth=0.7,
-              color="k",zorder=-150)
-  end
+for i in jump_k
+  vline!(fig,[(k_vec[i]+k_vec[i+1])/2.0],color="black",alpha=0.5)
 end
 
-
-# tweaks
-ax1.set_ylabel("Ribbon band energy")
-ax1.set_ylim(-2.3,2.3)
+#tweaks
+xlims!(fig,(0,1))
+ylabel!(fig,"Ribbon band energy")
+ylims!(fig,(-2.3,2.3))
+xlims!(fig,(0,1))
+xticks!(fig,k_node,k_label)
 
 # bottom plot shows Wannier center flow
 # bulk Wannier centers in green lines
@@ -115,11 +107,10 @@ ax1.set_ylim(-2.3,2.3)
 # compare with Fig 3 in Phys. Rev. Lett. 102, 107603 (2009)
 
 # plot bulk hybrid Wannier center positions and their periodic images
+fig2 = plot(framestyle=:box,legend=false)
 for j in -1:nky
-    ax2.plot(k_vec,j .+ phi_1 ./ (2π),"k-",zorder=-50)
+    plot!(fig2,k_vec,j .+ phi_1 ./ (2π),c="black")
 end
-
-phi_1
 
 # plot finite centers of ribbon along direction 1
 for i in 1:size(rib_evec,2)
@@ -128,24 +119,17 @@ for i in 1:size(rib_evec,2)
   # get centers of hybrid wannier functions
   hwfc = position_hwf(ribbon,occ_evec,2)
   # plot centers
-  s=ax2.scatter(ones(size(hwfc,1)).*k_vec[i], hwfc, c=hwfc, s=30,
-                marker="o", cmap="coolwarm", edgecolors="none",
-                vmin=0, vmax=nky, zorder=-100)
+  scatter!(fig2,ones(size(hwfc,1)).*k_vec[i],
+          hwfc, zcolor=hwfc, ms=2,m=(:coolwarm,0.6))
 end
 
-# color scale
-fig.colorbar(s,nothing,ax2,ticks=[0,nky])
+for i in jump_k
+  vline!(fig2,[(k_vec[i]+k_vec[i+1])/2.0],color="black",alpha=0.5)
+end
 
 # tweaks
-ax2.set_xlabel("k vector along direction 1")
-ax2.set_ylabel("Wannier center along direction 2")
-ax2.set_ylim(-0.5,nky+0.5)
-
-
-# label both axes
-for ax in (ax1,ax2)
-  ax.set_xlim(k_node[1],k_node[end])
-  ax.set_xticks(k_node)
-  ax.set_xticklabels(k_label)
-end
-fig.savefig("examples/haldane_hwf.pdf")
+xlabel!(fig2,"k vector along direction 1")
+ylabel!(fig2,"Wannier center along direction 2")
+ylims!(fig2,(-0.5,nky+0.5))
+xlims!(fig2,(0,1))
+xticks!(fig2,k_node,k_label)
