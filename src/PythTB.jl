@@ -7,7 +7,7 @@ module PythTB
     export setup_wf_array!, berry_phase, berry_flux, impose_pbc!, cut_piece
     export position_expectation, solve_on_grid!, position_hwf, make_supercell
     export impose_loop!, w90_model,dist_hop,bands_consistency
-    export calc_DOS, warmup_calc!, calc_OptCond, calc_Epsilon, calc_Reflectance
+    export warmup_calc!, calc_DOS, calc_OptCond, calc_Epsilon, calc_Reflectance, calc_LossFunction
     export show
     export σ
 
