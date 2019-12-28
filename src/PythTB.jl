@@ -7,7 +7,7 @@ module PythTB
     export setup_wf_array!, berry_phase, berry_flux, impose_pbc!, cut_piece
     export position_expectation, solve_on_grid!, position_hwf, make_supercell
     export impose_loop!, w90_model,dist_hop,bands_consistency
-    export calc_DOS
+    export calc_DOS, warmup_calc!, calc_OptCond, calc_Epsilon, calc_Reflectance
     export show
     export σ
 
@@ -42,10 +42,12 @@ module PythTB
         orb
         site_energies
         hoppings
+        mu
+        cache
 
         model(model) = new(model,0,false,
-                            0,0,0,0,0,
-                            0,0,0,0,0)
+                            0,0,0,0,0,0,
+                            0,0,0,0,0,0)
     end
 
     struct pauli
@@ -301,7 +303,22 @@ module PythTB
     end
 
     function k_uniform_mesh(model::model,mesh_size)
-        return model.model.k_uniform_mesh(mesh_size)
+        dim = model.dim_k
+        k = []
+        if dim == 1
+            for i in 0:(mesh_size[1]-1)
+                push!(k,[i/(mesh_size[1]-1)])
+            end
+        elseif dim == 2
+            for i in 0:(mesh_size[1]-1), j in 0:(mesh_size[2]-1)
+                push!(k,[i/(mesh_size[1]-1),j/(mesh_size[2]-1)])
+            end
+        elseif dim == 3
+            for i in 0:(mesh_size[1]-1), j in 0:(mesh_size[2]-1), l in 0:(mesh_size[3]-1)
+                push!(k,[i/(mesh_size[1]-1),j/(mesh_size[2]-1),l/(mesh_size[3]-1)])
+            end
+        end
+        return k
     end
 
     """
