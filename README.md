@@ -1,6 +1,6 @@
 # PythTB.jl
 
-PythTB.jl is Julia Wrapper for established package for Tight Binding that have been made.
+PythTB.jl is Julia Wrapper for established packages for Tight Binding that have been made.
 
 Current Implemented Packages:
 - PythTB v1.7.2 (full functionality)
@@ -26,7 +26,7 @@ kite = KITE(PATH)
 conf = configuration(tb,kite)
 ```
 
-then open your julia REPL, add PythTB.jl package
+then open your julia REPL, add PythTB.jl package in package mode (type `]`)
 ```julia
 add https://github.com/muhammadgaffar/PythTB.jl
 ```
@@ -113,7 +113,7 @@ See more advanced examples in `examples` folder.
 - add PythTB package with full functionality and examples.
 
 ## Acknowledgement
-All credits go to PythTB, PyBindig, and KITE developers.
+All credits go to PythTB, PyBinding, and KITE developers.
 
 ## TO DO
 - add KITE packages (full functionality)
