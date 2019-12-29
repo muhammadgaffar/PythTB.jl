@@ -1,18 +1,34 @@
 # PythTB.jl
 
-PythTB.jl is Julia Wrapper for PythTB 1.7.2 Package in Python via PyCall.
+PythTB.jl is Julia Wrapper for established package for Tight Binding that have been made.
+
+Current Implemented Packages:
+- PythTB v1.7.2 (full functionality)
+- KITE v1.0 (~50% functionality)
+- PyBinding v0.9.4 (~10% functionality)
 
 ## Installation
 Make sure your current python environment is Anaconda, then install PythTB python package first.
 
-Open you shell
+Open your shell
 ```
-pip install pythtb --upgrade
+pip install pythtb
+pip install pybinding
+```
+
+Install KITE, follow instruction from https://quantum-kite.com/installation/.
+Then we can use the KITE functionality with
+```julia
+# PATH where KITE is installed
+PATH = "/home/path/to/.../kite"
+kite = KITE(PATH)
+# interfacing and KITE configuration of the model
+conf = configuration(tb,kite)
 ```
 
 then open your julia REPL, add PythTB.jl package
 ```julia
-] add https://github.com/muhammadgaffar/PythTB.jl
+add https://github.com/muhammadgaffar/PythTB.jl
 ```
 
 ## Features
@@ -27,9 +43,10 @@ PythTB.jl include capabilities for
 - computing electron eigenvalues and eigenvectors at selected k-points or on a mesh of k-points
 - generating band-structure plots
 - generating density-of-states plots
-- calculate Berry Phase, and Berry curvature
+- calculating berry Phase, and berry curvature
+- calculating dc and optical conductivity (currently only for infinite model)
 
-PythTB.jl also provides an interface to the Wannier90 code, which can be used to take the output of a first-principles density-functional calculation and construct from it a tight-binding model, in the basis of Wannier functions, that accurately reproduces the first-principles bandstructure.
+PythTB.jl also provides an interface to the Wannier90 code, which can be used to take the output of a first-principles density-functional calculation and construct from it a tight-binding model, in the basis of Wannier functions, that accurately reproduces the first-principles band-structure.
 
 ## Usage
 This is example usage in honeycomb lattice
@@ -79,17 +96,29 @@ using Plots
 plot(k_dist,eigvals')
 ```
 
-See more advanced examples in 'examples' folder.
+See more advanced examples in `examples` folder.
+
+## Changelog
+
+#### v0.2
+- add KITE and PyBinding for transport properties calculation.
+
+#### v0.15
+- add function documentation for PythTB functionality.
+
+#### v0.12
+- remake visualization in pure julia plots, instead pyplot.
+
+#### v0.1
+- add PythTB package with full functionality and examples.
 
 ## Acknowledgement
-All credits are goes to PythTB developer:
-- Sinisa Coh (University of California at Riverside)
-- David Vanderbilt (Rutgers University)
+All credits go to PythTB, PyBindig, and KITE developers.
 
 ## TO DO
-- documentation
-- transport calculation (calc.jl), i.e dc conductivity, optical conductivity
+- add KITE packages (full functionality)
+- add PyBinding packages (full functionality)
+- make docker images for lazy deps installation
 
 ## Goal
-PythTB.jl aims for fast, easy, and rich calculation of physical observable
-based on Tight Binding approach.
+PythTB.jl aims to unify all functionality of established packages based on Tight Binding approach in JULIA!

@@ -11,14 +11,18 @@ module PythTB
     export show
     export σ
 
+    export KITE, configuration, calc_dos, calc_opticalConductivity, calc_dcConductivity
+
     ####################################
     # PythTB Wrapper and Plots dependencies
     ###################################
 
     const TB = PyNULL()
+    const pb = PyNULL()
 
     function __init__()
         copy!(TB, pyimport_conda("pythtb", "pythtb"))
+        copy!(pb, pyimport_conda("pybinding", "pybinding"))
         @require Plots="91a5bcdd-55d7-5caf-9e0b-520d859cae80" include("visualize.jl")
     end
 
@@ -910,5 +914,6 @@ module PythTB
     end
 
     include("calc.jl")
+    include("kite.jl")
 
 end # module PythTB
