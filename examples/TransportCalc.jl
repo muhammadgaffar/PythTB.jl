@@ -3,7 +3,7 @@ using PythTB
 # This is example how to use KITE for DOS and transport calculation in graphene
 
 #my kite path installation
-PATH = "/home/mgaffar/envs/kite"
+PATH = "/home/mgaffar/SOFTWARE/kite"
 kite = KITE(PATH)
 
 #honeycomb lattice
@@ -26,7 +26,7 @@ conf = configuration(tb,kite)
 #calculate the transport properties
 w,dos = calc_dos(conf; nw=1000)
 hw,sxx = calc_opticalConductivity(conf,nhw=1000,T=300,direction="xx")
-ww,cxx = calc_dcConductivity(conf, nw=1000,T=300,direction="xx")
+ww,cxx = calc_dcConductivity(conf, nw=101,T=300,direction="xx")
 
 using Plots
 

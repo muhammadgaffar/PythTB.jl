@@ -89,7 +89,7 @@ module PythTB
         println(io,"site energies:")
         if model.nspin == 2
             for i in 1:size(model.site_energies,1)
-                o = model.site_energies[:,:,i]
+                o = model.site_energies[i,:,:]
                 println(io,"# ε[$i] : ")
                 show(IOContext(io, :limit=>false), MIME"text/plain"(), o)
                 println(io,"")
@@ -282,7 +282,11 @@ module PythTB
     ```
     """
     function set_onsite!(model::model,en,ind_i = nothing; mode = "set")
-        model.model.set_onsite(en,ind_i,mode = mode)
+        if ind_i == nothing
+            model.model.set_onsite(en,ind_i,mode = mode)
+        else
+            model.model.set_onsite(en,ind_i - 1,mode = mode)
+        end
         model.site_energies = model.model._site_energies
     end
 

@@ -47,7 +47,11 @@ function configuration(tb::model,kite::command; parallel=[4,4],lat_size=[1024,10
         if tb.dim_r == 1
             model.add_one_sublattice(string(i),[tb.orb[i],0],tb.site_energies[i])
         else
-            model.add_one_sublattice(string(i),tb.orb[i,:],tb.site_energies[i])
+            if tb.nspin==1
+                model.add_one_sublattice(string(i),tb.orb[i,:],tb.site_energies[i])
+            elseif tb.nspin==2
+                model.add_one_sublattice(string(i),tb.orb[i,:],tb.site_energies[i,:,:])
+            end
         end
     end
     for i in 1:size(tb.hoppings,1)
@@ -126,6 +130,8 @@ function calc_dcConductivity(config::config; nw,num_random=1,num_moments=512,T,d
     config.calc.conductivity_dc(num_points=nw, num_moments=nmomt, num_random=nrand,
                                 direction=dir, temperature=T)
     config.kite.py.config_system(config.pb,config.conf,config.calc,filename=prefix)
+
+    println("done")
 
     cmd = config.kite.x * prefix
     Shell.run(cmd)
