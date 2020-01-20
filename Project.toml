@@ -11,6 +11,7 @@ PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 Shell = "89279098-3423-5141-994b-b871f91dcb82"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+Suppressor = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
 
 [extras]
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"

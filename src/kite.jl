@@ -1,5 +1,6 @@
 using Shell
 using DelimitedFiles
+using Supressor
 
 struct command
     x
@@ -82,9 +83,9 @@ function calc_dos(config::config; nw, num_random=1, num_moments=512)
     config.kite.py.config_system(config.pb,config.conf,config.calc,filename=prefix)
 
     cmd = config.kite.x * prefix
-    Shell.run(cmd)
+    @suppress Shell.run(cmd)
     cmd = config.kite.tools * prefix
-    Shell.run(cmd)
+    @suppress Shell.run(cmd)
 
     x = readdlm("dos.dat")
 
@@ -107,9 +108,9 @@ function calc_opticalConductivity(config::config; nhw,num_random=1,num_moments=5
     config.kite.py.config_system(config.pb,config.conf,config.calc,filename=prefix)
 
     cmd = config.kite.x * prefix
-    Shell.run(cmd)
+    @suppress Shell.run(cmd)
     cmd = config.kite.tools * prefix
-    Shell.run(cmd)
+    @suppress Shell.run(cmd)
 
     x = readdlm("optcond.dat")
 
@@ -134,9 +135,9 @@ function calc_dcConductivity(config::config; nw,num_random=1,num_moments=512,T,d
     println("done")
 
     cmd = config.kite.x * prefix
-    Shell.run(cmd)
+    @suppress Shell.run(cmd)
     cmd = config.kite.tools * prefix
-    Shell.run(cmd)
+    @suppress Shell.run(cmd)
 
     x = readdlm("condDC.dat")
 
