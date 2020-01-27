@@ -5,25 +5,11 @@ using StatsBase
 ####################################
 # Base of the calc.jl
 ###################################
-
-import Base.+
-
 const HALF = 1/2
-
-+(A::Array{Float64,1},B) = A .+ B
-matmul(A,B) = A * B
 
 function integrate(x::AbstractVector, y::AbstractVector)
     @assert length(x) == length(y) "x and y vectors must be of the same length!"
     return (x[2] - x[1]) * (HALF * (y[1] + y[end]) + sum(y[2:end-1]))
-end
-
-mutable struct cache
-    k
-    w
-    Hk
-    vmat
-    Gwk
 end
 
 function fermi(w,μ,T)
@@ -41,109 +27,12 @@ end
 ###################################
 
 """
-    warmup_calc!(model, kmesh,wmesh,w_window; η,report=true)
-
-Pre-processing of calculation such density state and transport
-properties. It will generate hamiltonian, velocity, and G(w,k) matrix in cache of
-the model for given `kmesh` and 'wmesh' size.
-
-# Optional Arguments
-- `η` : (Default is `η = 0.05`). Lorentzian width for G(w,k), where
-
-```math
-G(w,\\mathbf{k}) = \\frac{1}{w + iη - H(\\mathbf{k})}
-```
-- `report` : Boolean argument. It will printout the current task that this function
-            calculate. Default is `false`
-
-# Examples
-```julia
-# for example for 2D k-space dimension
-tb = tb_model(2,2,lat,orb)
-# we need specify kmesh for both direction
-warmup_calc!(tb,[100,150],200,(-4,4))
-```
-"""
-function warmup_calc!(model::model,kmesh,wmesh,w_window; η=0.05,report=false)
-    #check kmesh dim
-    if length(kmesh) != model.dim_k
-        @error "kmesh size must be same size as dim_k"
-    end
-
-    #warmup params
-    k_vec = k_uniform_mesh(model, kmesh)
-    w = LinRange(w_window...,wmesh)
-    nk = length(k_vec)
-    nst = model.nstates
-
-    #collect Ham
-    if report == true
-        @info "Collecting Hamiltonian matrix"
-    end
-    H(k) = hamiltonian(model,k)
-    Hk = H.(k_vec)
-
-    #collect vk
-    if report == true
-        @info "Collecting Velocity matrix"
-    end
-    vx = []
-    vy = []
-    vz = []
-
-    dk = 1e-5
-    if model.dim_k == 1
-        for i in 1:nk
-            dkx = [k_vec[i][1] + dk]
-            v = (H(dkx) - Hk[i]) / dk
-            push!(vx,real(v))
-        end
-    elseif model.dim_k == 2
-        for i in 1:nk
-            dkx = [k_vec[i][1] + dk, k_vec[i][2]]
-            v = (H(dkx) - Hk[i]) ./ dk
-            push!(vx,real(v))
-            dky = [k_vec[i][1], k_vec[i][2] + dk]
-            v = (H(dky) - Hk[i]) ./ dk
-            push!(vy,real(v))
-        end
-    elseif model.dim_k == 3
-        for i in 1:nk
-            dkx = [k_vec[i][1] + dk, k_vec[i][2], k_vec[i][3]]
-            v = (H(dkx) - Hk[i]) ./ dk
-            push!(vx,real(v))
-            dky = [k_vec[i][1], k_vec[i][2] + dk, k_vec[i][3]]
-            v = (H(dky) - Hk[i]) ./ dk
-            push!(vy,real(v))
-            dkz = [k_vec[i][1], k_vec[i][2], k_vec[i][3] + dk]
-            v = (H(dkz) - Hk[i]) ./ dk
-            push!(vz,real(v))
-        end
-    end
-
-
-    #collect Gwk
-    if report == true
-        @info "Collecting Gwk matrix"
-    end
-    Gwk = []
-    Id = Matrix(I,nst,nst)
-    for (i,wx) in enumerate(w)
-        Iw = Id * (wx + 1im*η)
-        Gk = []
-        for (ik,Hkx) in enumerate(Hk)
-            push!(Gk,inv(Iw .- Hkx))
-        end
-        push!(Gwk,float.(Gk))
-    end
-
-    model.cache = cache(k_vec,w,Hk,(float.(vx),float.(vy),float.(vz)),Gwk)
-end
-
-"""
-    calc_DOS(model)
+    calc_DOS(model, nw, kmesh, wrange, eta)
 
 Calculate density of state of the model.
+
+# Optional Arguments
+- `eta` : Lorentzian Width for approximating δ(E)
 
 # Returns
 - `w` : energy mesh
@@ -155,31 +44,34 @@ Calculate density of state of the model.
 tb = tb_model(2,2,lat,orb)
 set_onsite! ...
 set_hop! ...
-# warmup the calculation
-warmup_calc(tb,)
 # calculate dos
-w, dos = cacl_DOS(tb)
+w, dos = cacl_DOS(tb, nw=100, kmesh=[100,100], wrange=(-4,4))
 ```
 """
-function calc_DOS(model::model)
-    if model.dim_k == 0
-        eigvals = solve_eig(model)
-        dw = model.cache.w[2] - model.cache.w[1]
-        wmesh = append!(model.cache.w,model.cache.w[end]+dw)
-
-        hist = fit(Histogram,vec(eigvals),wmesh)
-        dos  = hist.weights / ( size(eigvals,1) * size(eigvals,2) )
-
-        return wmesh,dos
-    else
-        if model.cache == 0
-            @error "cache has not been setup. Please, warm up first."
-        end
-        Gw = tr.(sum.(model.cache.Gwk)) / length(model.cache.k)
-        dos = -imag(Gw) / π
-
-        return model.cache.w, dos
+function calc_DOS(model;nw,kmesh,wrange,eta=0.01)
+    if length(kmesh) != model.dim_k
+        error("number of kmesh must same as number of k direction")
     end
+    if typeof(wrange) != Tuple(Int64,Int64)
+        error("please specify right frequency range in Tuple")
+    end
+
+    k = k_uniform_mesh(model,kmesh)
+    H(k) = hamiltonian(model,k)
+
+    w = LinRange(wrange[1],wrange[2],nw)
+
+    dos = zeros(Float64,size(w)...)
+
+    @info "calculating dos"
+    @inbounds for ik in 1:length(k)
+        kp = k[ik]
+        for (ie,ep) in enumerate(eigvals(H(kp)))
+            dos += eta ./ ( (w .- ep).^2 .+ eta^2 )
+        end
+    end
+
+    return w,dos / (kmesh[1]*kmesh[2])
 end
 
 """

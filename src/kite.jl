@@ -1,6 +1,6 @@
 using Shell
 using DelimitedFiles
-using Supressor
+using Suppressor
 
 struct command
     x
@@ -79,8 +79,8 @@ function calc_dos(config::config; nw, num_random=1, num_moments=512)
     nmomt = num_moments
     prefix = "tmp.h5"
 
-    config.calc.dos(num_points=nw,num_random=nrand,num_moments=nmomt)
-    config.kite.py.config_system(config.pb,config.conf,config.calc,filename=prefix)
+    @suppress config.calc.dos(num_points=nw,num_random=nrand,num_moments=nmomt)
+    @suppress config.kite.py.config_system(config.pb,config.conf,config.calc,filename=prefix)
 
     cmd = config.kite.x * prefix
     @suppress Shell.run(cmd)
@@ -103,9 +103,9 @@ function calc_opticalConductivity(config::config; nhw,num_random=1,num_moments=5
     dir   = direction
     prefix = "tmp.h5"
 
-    config.calc.conductivity_optical(num_points=nhw,num_random=nrand,
+    @suppress config.calc.conductivity_optical(num_points=nhw,num_random=nrand,
                                 num_moments=nmomt,direction=dir,temperature=T)
-    config.kite.py.config_system(config.pb,config.conf,config.calc,filename=prefix)
+    @suppress config.kite.py.config_system(config.pb,config.conf,config.calc,filename=prefix)
 
     cmd = config.kite.x * prefix
     @suppress Shell.run(cmd)
@@ -128,11 +128,9 @@ function calc_dcConductivity(config::config; nw,num_random=1,num_moments=512,T,d
     dir   = direction
     prefix = "tmp.h5"
 
-    config.calc.conductivity_dc(num_points=nw, num_moments=nmomt, num_random=nrand,
+    @suppress config.calc.conductivity_dc(num_points=nw, num_moments=nmomt, num_random=nrand,
                                 direction=dir, temperature=T)
-    config.kite.py.config_system(config.pb,config.conf,config.calc,filename=prefix)
-
-    println("done")
+    @suppress config.kite.py.config_system(config.pb,config.conf,config.calc,filename=prefix)
 
     cmd = config.kite.x * prefix
     @suppress Shell.run(cmd)
