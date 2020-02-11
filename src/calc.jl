@@ -52,9 +52,6 @@ function calc_DOS(model;nw,kmesh,wrange,eta=0.01)
     if length(kmesh) != model.dim_k
         error("number of kmesh must same as number of k direction")
     end
-    if typeof(wrange) != Tuple(Int64,Int64)
-        error("please specify right frequency range in Tuple")
-    end
 
     k = k_uniform_mesh(model,kmesh)
     H(k) = hamiltonian(model,k)
@@ -66,7 +63,12 @@ function calc_DOS(model;nw,kmesh,wrange,eta=0.01)
     @info "calculating dos"
     @inbounds for ik in 1:length(k)
         kp = k[ik]
-        for (ie,ep) in enumerate(eigvals(H(kp)))
+        ham = H(kp)
+        if model.nspin==2
+            s = size(ham,1)*size(ham,2)
+            ham = reshape(ham, (s,s))
+        end
+        for (ie,ep) in enumerate(eigvals(ham))
             dos += eta ./ ( (w .- ep).^2 .+ eta^2 )
         end
     end
