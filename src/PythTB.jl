@@ -11,6 +11,7 @@ module PythTB
     export show
     export σ
 
+    export to_pybinding
     export KITE, configuration, calc_dos, calc_opticalConductivity, calc_dcConductivity
 
     ####################################
@@ -46,12 +47,9 @@ module PythTB
         orb
         site_energies
         hoppings
-        mu
-        cache
 
         model(model) = new(model,0,false,
-                            0,0,0,0,0,0,
-                            0,0,0,0,0,0)
+                            0,0,0,0,0,0,0,0,0,0,)
     end
 
     struct pauli
@@ -70,40 +68,20 @@ module PythTB
         println(io,"===============================================")
         println(io,"k-space dimension   = ", model.dim_k)
         println(io,"r-space dimension   = ", model.dim_r)
-        println(io,"periodic direction  = ", model.per)
+        if model.per != []
+            println(io,"periodic direction  = ", model.per)
+        else
+            println(io,"periodic direction  = no periodicity")
+        end
         println(io,"number of orbitals  = ", model.norb)
         println(io,"number of states    = ", model.nstates)
-        if model.hoppings == []
-            println(io,"number of hoppings  = 0")
-        else
-            nhop = size(model.hoppings,1)
-            println(io,"number of hoppings  = $nhop")
-        end
+        nhop = size(model.hoppings,1)
+        println(io,"number of hoppings  = $nhop")
         println(io,"------------------------------------------")
         println(io,"lattice vectors:")
         for i in 1:size(model.latvec,1)
             o = model.latvec[i,:]
             println(io,"# â[$i] ==> ", round.(o,digits=4))
-        end
-        println(io,"------------------------------------------")
-        println(io,"position of orbitals:")
-        for i in 1:size(model.orb,1)
-            o = model.orb[i,:]
-            println(io,"# r[$i] ==> ", round.(o,digits=4))
-        end
-        println(io,"------------------------------------------")
-        println(io,"site energies:")
-        if model.nspin == 2
-            for i in 1:size(model.site_energies,1)
-                o = model.site_energies[i,:,:]
-                o = round.(o,digits=3)
-                println(io,"# ε[$i] : [$(o[1,1]),$(o[2,2])]")
-            end
-        else
-            for i in 1:size(model.site_energies,1)
-                o = model.site_energies[i]
-                println(io,"# ε[$i] ==> ", round.(o,digits=3))
-            end
         end
     end
 
@@ -127,23 +105,37 @@ module PythTB
               If `dim_k` is smaller than `dim_r`, then by default the first
               dim_k vectors are considered to be periodic.
     - `nspin` : Number of explicit spin components assumed for each orbital in orb.
-                Allowed values of `nspin` are 1 and 2. If `nspin` is 1 then the model is spinless,
-                if `nspin` is 2 then it is explicitly a spinfull model and each orbital is
-                assumed to have two spin components. Default value of this parameter is 1.
 
     # Examples
     ```julia
-    # Creates model that is two-dimensional in real space but only
-    # one-dimensional in reciprocal space. Second lattice vector is
-    # chosen to be periodic (since per=[2]). Three orbital
-    # coordinates are specified.
-
-    lat = [1.0 0.5; 0.0 2.0]
-    orb = [0.2 0.3; 0.1 0.1; 0.2 0.2]
-    model  = tb_model(1, 2, lat, orb, per=[2])
-
-    # read the summary of the model
-    show(model)
+    julia> lat = [1.0 0.5;
+                  0.0 2.0];
+    julia> orb = [0.2 0.3;
+                  0.1 0.1;
+                  0.2 0.2];
+    julia> model  = tb_model(1, 2, lat, orb, per=[2])
+    Tight-binding model summary
+    ===============================================
+    k-space dimension   = 1
+    r-space dimension   = 2
+    periodic direction  = [2]
+    number of orbitals  = 3
+    number of states    = 3
+    number of hoppings  = 0
+    ------------------------------------------
+    lattice vectors:
+    # â[1] ==> [1.0, 0.5]
+    # â[2] ==> [0.0, 2.0]
+    ------------------------------------------
+    position of orbitals:
+    # r[1] ==> [0.2, 0.3]
+    # r[2] ==> [0.1, 0.1]
+    # r[3] ==> [0.2, 0.2]
+    ------------------------------------------
+    site energies:
+    # ε[1] ==> 0.0
+    # ε[2] ==> 0.0
+    # ε[3] ==> 0.0
     ```
     """
     function tb_model(dim_k,dim_r,lat,orb; per = nothing,nspin = 1)
@@ -197,22 +189,15 @@ module PythTB
     - `ind_R` :     Lattice vector (integer array, in reduced coordinates) pointing to the unit cell where the ket orbital is located.
 
     # Optional arguments
-    - `mode` :      Speficies way in which parameter hop_amp is used. Default is `set`.
+    - `mode` :      Default is `set`. Speficies way in which parameter hop_amp is used.
                     It can either set value of hopping term from scratch (`set`),
                     reset it (`reset`), or add to it (`add`).
-    - `allow_conjugate_pair` : Default is `True`. If set to `True` code will allow user to specify hopping i -> j+R
+    - `allow_conjugate_pair` : Default is `true`. If set to `true` code will allow user to specify hopping i -> j+R
                              even if conjugate-pair hopping j -> i-R has been specified
 
     # Examples
     ```julia
-    # Specifies complex hopping amplitude between first orbital in home
-    # unit cell and third orbital in neigbouring unit cell.
-    set_hop!(model, 0.3+0.4j, 1, 3, [0, 1])
-    # change value of this hopping
-    set_hop!(model, 0.1+0.2j, 1, 3, [0, 1], mode="reset")
-    # add to previous value (after this function call below,
-    # hopping term amplitude is 100.1+0.2j)
-    set_hop!(model, 100.0, 1, 3, [0, 1], mode="add")
+    julia> set_hop!(model, 0.3+0.4im, 1, 3, [0, 1])
     ```
     """
     function set_hop!(model::model,hop_amp,i,j,R = nothing; mode = "set",
@@ -220,6 +205,7 @@ module PythTB
 
         model.model.set_hop(hop_amp,i-1,j-1,R,mode,allow_conjugate_pair)
         model.hoppings = model.model._hoppings
+        nothing
     end
 
     """
@@ -240,20 +226,22 @@ module PythTB
                 is a single number (not a list).
 
     # Optional arguments
-    - `mode` :  Speficies way in which parameter onsite_en is used. Default is `set`.
+    - `mode` :  Default is `set`. Speficies way in which parameter onsite_en is used.
                 It can either set value of on-site energy from scratch, reset it,
                 or add to it.
 
     # Examples
     ```julia
-    # Defines on-site energy of first orbital to be 0.0, second 1.0, and third 2.0
-    set_onsite!(model, [0.0, 1.0, 2.0])
-    # Increases value of on-site energy for second orbital
-    set_onsite!(model, 100.0, 1, mode="add")
-    # Changes on-site energy of second orbital to zero
-    set_onsite!(model, 0.0, 1, mode="reset")
-    # Sets all three on-site energies at once
-    set_onsite!(model, [2.0, 3.0, 4.0], mode="reset")
+    julia> set_onsite!(model, [0.0, 1.0, 2.0])
+    3-element Array{Float64,1}:
+     0.0
+     1.0
+     2.0
+    julia> set_onsite!(model, -2.43im, 1, mode="add")
+    3-element Array{Float64,1}:
+     -2.43
+      1.0
+      2.0
     ```
     """
     function set_onsite!(model::model,en,ind_i = nothing; mode = "set")
@@ -319,11 +307,8 @@ module PythTB
 
     # Examples
     ```julia
-    # diagonalizes Hamiltonian at some k-points
-    evals, evecs = solve_eig(model, k_vec,eig_vec=true)
-    # computes position operator matrix elements for 3-rd kpoint
-    # and bottom five bands along first coordinate
-    pos_mat = position_matrix(model, evecs[1:5,2],1)
+    julia> evals, evecs = solve_eig(model, k_vec,eig_vec=true)
+    julia> pos_mat = position_matrix(model, evecs[1:5,2],1)
     ```
     """
     function position_matrix(model::model,eigvec,dir)
@@ -359,12 +344,8 @@ module PythTB
 
     # Examples
     ```julia
-    # Construct a path connecting four nodal points in k-space
-    # Path will contain 401 k-points, roughly equally spaced
-    path = [0.0 0.0; 0.0 0.5; 0.5 0.5; 0.0 0.0]
-    k_vec,k_dist,k_node = k_path(model, path,401)
-    # solve for eigenvalues on that path
-    evals = solve_eig(model, k_vec)
+    julia> path = [0.0 0.0; 0.0 0.5; 0.5 0.5; 0.0 0.0];
+    julia> k_vec,k_dist,k_node = k_path(model, path,401)
     ```
     """
     function k_path(model::model,kpts,nk; report = false)
@@ -374,14 +355,12 @@ module PythTB
     """
         hamiltonian(model, k)
 
-    Generate hamiltonian for a model at certain of k-point. k-point is given in
-    reduced coordinate.
+    Generate hamiltonian matrix for a model at certain of k-point.
+    k-point is given in reduced coordinate.
 
     # Examples
     ```julia
-    # for 3D k-space
-    k_point = [1 π 1/3π]
-    Hmat = hamiltonian(model, k_point)
+    julia> Hmat = hamiltonian(model, k_point)
     ```
     """
     function hamiltonian(model::model,k)
@@ -396,10 +375,8 @@ module PythTB
 
     # Examples
     ```julia
-    # Returns eigenvalues for three k-vectors
-    eval = solve_eig(model, [0.0 0.0; 0.0 0.2; 0.0 0.5])
-    # Returns eigenvalues and eigenvectors for two k-vectors
-    eval, evec = solve_eig(model, [0.0 0.0; 0.0 0.2],eig_vec=true)
+    julia> eval = solve_eig(model, [0.0 0.0; 0.0 0.2; 0.0 0.5])
+    julic> eval, evec = solve_eig(model, [0.0 0.0; 0.0 0.2],eig_vec=true)
     ```
     """
     function solve_eig(model::model,k_list = nothing; eig_vec = false)
@@ -431,13 +408,13 @@ module PythTB
     # Examples
     ```julia
     # Construct wf_array capable of storing an 11x21 array of wavefunctions
-    setup_wf_array!(model, [11,21])
+    julia> setup_wf_array!(model, [11,21])
     # populate this wf_array with regular grid of points in Brillouin zone
-    solve_on_grid!(model, [0.0, 0.0])
+    julia> solve_on_grid!(model, [0.0, 0.0])
     # Compute set of eigenvectors at one k-point
-    eval, evec = solve_eig([kx, ky], eig_vec = true)
+    julia> eval, evec = solve_eig([kx, ky], eig_vec = true)
     # Store it manually into a specified location in the array
-    model.array[3, 4] = evec
+    julia> model.array[3, 4] = evec
     ```
     """
     function setup_wf_array!(model::model,mesh)
@@ -515,7 +492,7 @@ module PythTB
     # occupied states. For example, if wf is threedimensional, then
     # phase[2,3] would correspond to Berry phase of string of states
     # along model.array[2,:,3]
-    phase = berry_phase!(model, [1, 2, 3], 2)
+    julia> phase = berry_phase!(model, [1, 2, 3], 2)
     ```
     """
     function berry_phase(model::model,occ,dir=nothing;
@@ -565,7 +542,7 @@ module PythTB
 
     # Examples
     ```julia
-    flux  = berry_flux(model, [1,2,3])
+    julia> flux  = berry_flux(model, [1,2,3])
     ```
     """
     function berry_flux(model::model,occ,dir=nothing;
@@ -599,7 +576,7 @@ module PythTB
     # by one reciprocal lattice vector.  This could happen, for
     # example, if the underlying tb_model is two dimensional but
     # wf_array is a one-dimensional path along k_y direction.
-    impose_pbc!(model, 1,2)
+    julia> impose_pbc!(model, 1,2)
     ```
     """
     function impose_pbc!(model::model,mesh_dir,k_dir)
@@ -629,7 +606,7 @@ module PythTB
     # Then to insure that the states at the ends of the lambda
     # path are equal (with equal phase) in preparation for
     # computing Berry phases in lambda for given (kx,ky),
-    impose_loop!(model, mesh_dir=3)
+    julia> impose_loop!(model, mesh_dir=3)
     ```
     """
     function impose_loop!(model::model, mesh_dir)
@@ -648,14 +625,14 @@ module PythTB
 
     # Examples
     ```julia
-    A = tb_model(3, 3, ...)
+    julia> A = tb_model(3, 3, args...)
     # Construct TB model out of model A
     # by repeating model along second lattice vector ten times
-    B = cut_piece(A, 10, 2)
+    julia> B = cut_piece(A, 10, 2)
     # Further cut two-dimensional model B into one-dimensional model
     # A by repeating unit cell twenty times along third lattice
     # vector and allow hoppings from one edge to the other
-    C = cut_piece(B, 20, 2, glue_edgs=true)
+    julia> C = cut_piece(B, 20, 2, glue_edgs=true)
     ```
     """
     function cut_piece(mod::model,num,finite_dir;glue_edgs=false)
@@ -684,10 +661,10 @@ module PythTB
     # Examples
     ```julia
     # diagonalizes Hamiltonian at some k-points
-    evals, evecs = solve_eig(mode, k_vec,eig_vec=true)
+    julia> evals, evecs = solve_eig(mode, k_vec,eig_vec=true)
     # computes average position for 3-rd kpoint
     # and bottom five bands along first coordinate
-    pos_exp = my_model.position_expectation(evecs[1:5,2], 1)
+    julia> pos_exp = my_model.position_expectation(evecs[1:5,2], 1)
     ```
     """
     function position_expectation(model::model,eig_vectors,dir)
@@ -703,7 +680,7 @@ module PythTB
 
     # Examples
     ```julia
-    solve_on_grid(model, [-0.5, -0.5])
+    julia> solve_on_grid(model, [-0.5, -0.5])
     ```
     """
     function solve_on_grid!(model::model,start_k)
@@ -730,7 +707,7 @@ module PythTB
                 this function will return not only eigenvalues but also
                 eigenvectors of position operator. Default value is `false`.
     - `basis` : If `basis="bloch"` then hybrid Wannier function `hwf_evec` is written
-            in the Bloch basis.  I.e. hwf[i,j] correspond to the weight of j-th
+            in the Bloch basis.  i.e. hwf[i,j] correspond to the weight of j-th
             Bloch state from `eigvec` in the i-th hybrid Wannier function.
             If `basis="orbital"` and `nspin=1` then hwf[i,orb] correspond to the
             weight of orb-th orbital in the i-th hybrid Wannier function.
@@ -741,10 +718,10 @@ module PythTB
     # Examples
     ```julia
     # diagonalizes Hamiltonian at some k-points
-    evals, evecs = solve_eig(model, k_vec,eig_vec=true)
+    julia> evals, evecs = solve_eig(model, k_vec,eig_vec=true)
     # computes hybrid Wannier centers (and functions) for 3-rd kpoint
     # and bottom five bands along first coordinate
-    hwfc, hwf = position_hwf(model, evecs[1:5,2], 1, hwf_evec=true)
+    julia> hwfc, hwf = position_hwf(model, evecs[1:5,2], 1, hwf_evec=true)
     ```
     """
     function position_hwf(model::model,evec,dir;hwf_evec=false,basis="orbital")
@@ -759,7 +736,7 @@ module PythTB
     with arbitrary surfaces.
 
     # Optional arguments
-    - `return_sc_vectors` : Default value is `false`. If `true` returns
+    - `return_sc_vectors` : Default is `false`. If `true` returns
                         also lattice vectors inside the super-cell.
     - `to_home` : If `true` will shift all orbitals to the home cell.
                 Default value is `true`.
@@ -767,7 +744,7 @@ module PythTB
     # Examples
     ```julia
     # Creates super-cell out of 2d tight-binding model tb
-    sc_tb = make_supercell(model, [2 1; -1 2])
+    julia> sc_tb = make_supercell(model, [2 1; -1 2])
     ```
     """
     function make_supercell(mod::model,sc_red_lat;return_sc_vectors=false,to_home=true)
@@ -822,7 +799,7 @@ module PythTB
     ```julia
     # reads Wannier90 from folder called `example_a` folder
     # it assumes that that folder contains files "silicon.win" and so on
-    w90model = w90("example_a", "silicon")
+    julia> w90model = w90("example_a", "silicon")
     ```
     """
     function w90_model(path,prefix; zero_energy = 0.0, min_hopping_norm = nothing,
@@ -855,7 +832,7 @@ module PythTB
     # Examples
     ```julia
     # get distances and hopping terms
-    dist, ham = dist_hop(w90model)
+    julia> dist, ham = dist_hop(w90model)
     ```
     """
     function dist_hop(model::model)
@@ -882,9 +859,9 @@ module PythTB
     # Examples
     ```julia
     # get band structure from wannier90
-    w90_kpt,w90_evals = bands_consistency(w90model)
+    julia> w90_kpt,w90_evals = bands_consistency(w90model)
     # solve simplified model on the same k-path as in wannier90
-    evals = solve_eig(w90model, w90_kpt)
+    julia> evals = solve_eig(w90model, w90_kpt)
     ```
     """
     function bands_consistency(model::model)
@@ -892,7 +869,7 @@ module PythTB
         return kpts, energy
     end
 
-    include("calc.jl")
+    include("PyBinding.jl")
     include("kite.jl")
 
 end # module PythTB
