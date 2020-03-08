@@ -30,41 +30,18 @@ function KITE(PATH::String)
     return command(x,tools,py)
 end
 
-function configuration(tb::model,kite::command; parallel=[4,4],lat_size=[1024,1024],
-                    PBC=[true,true],is_complex=false,precision=1,w_range=nothing)
+function cleanup()
+    run(`rm -rf tmp.h5`)
+    run(`rm -rf optcond.dat`)
+    run(`rm -rf condDC.dat`)
+    nothing
+end
 
-    if tb.dim_r == 1
-        model = pb.Lattice(a1 = [tb.latvec[1],0], a2 = [0,1])
-        parallel = [4,1]
-        lat_size = [4*1024,64]
-    elseif tb.dim_r == 2
-        model = pb.Lattice(a1 = tb.latvec[1,:], a2 = tb.latvec[2,:])
-    elseif tb.dim_r == 3
-        model = pb.Lattice( a1 = tb.latvec[1,:],
-                            a2 = tb.latvec[2,:],
-                            a3 = tb.latvec[3,:] )
-    end
-    for i in 1:tb.norb
-        if tb.dim_r == 1
-            model.add_one_sublattice(string(i),[tb.orb[i],0],tb.site_energies[i])
-        else
-            if tb.nspin==1
-                model.add_one_sublattice(string(i),tb.orb[i,:],tb.site_energies[i])
-            elseif tb.nspin==2
-                model.add_one_sublattice(string(i),tb.orb[i,:],tb.site_energies[i,:,:])
-            end
-        end
-    end
-    for i in 1:size(tb.hoppings,1)
-        h = tb.hoppings[i,:]
-        if tb.dim_r == 1
-            model.add_one_hopping([h[4],0],string(h[2] .+ 1),string(h[3] .+ 1),h[1])
-        else
-            model.add_one_hopping(h[4],string(h[2] .+ 1),string(h[3] .+ 1),h[1])
-        end
-    end
+function configuration(tb::model,kite::command; parallel,lat_size,
+                    PBC,complex=false,precision=1,w_range=nothing)
 
-    complex = is_complex
+    model = to_pybinding(tb)
+
     prec = precision
 
     conf = kite.py.Configuration(divisions=parallel,length=lat_size,boundaries=PBC,
@@ -79,6 +56,8 @@ function calc_dos(config::config; nw, num_random=1, num_moments=512)
     nmomt = num_moments
     prefix = "tmp.h5"
 
+    println("Calculating Density of State...")
+
     @suppress config.calc.dos(num_points=nw,num_random=nrand,num_moments=nmomt)
     @suppress config.kite.py.config_system(config.pb,config.conf,config.calc,filename=prefix)
 
@@ -87,21 +66,21 @@ function calc_dos(config::config; nw, num_random=1, num_moments=512)
     cmd = config.kite.tools * prefix
     @suppress Shell.run(cmd)
 
+    println("Done...!")
+
     x = readdlm("dos.dat")
 
-    rm = "rm -rf dos.dat"
-    Shell.run(rm)
-    rm = "rm -rf tmp.h5"
-    Shell.run(rm)
+    cleanup()
 
     return x[:,1], x[:,2]
 end
 
-function calc_opticalConductivity(config::config; nhw,num_random=1,num_moments=512,T,direction)
+function calc_opticalConductivity(config::config; nhw,num_random=1,num_moments=512,T,dir)
     nrand = num_random
     nmomt = num_moments
-    dir   = direction
     prefix = "tmp.h5"
+
+    println("Calculating Optical Conductivity...")
 
     @suppress config.calc.conductivity_optical(num_points=nhw,num_random=nrand,
                                 num_moments=nmomt,direction=dir,temperature=T)
@@ -112,21 +91,21 @@ function calc_opticalConductivity(config::config; nhw,num_random=1,num_moments=5
     cmd = config.kite.tools * prefix
     @suppress Shell.run(cmd)
 
+    println("Done...!")
+
     x = readdlm("optcond.dat")
 
-    rm = "rm -rf optcond.dat"
-    Shell.run(rm)
-    rm = "rm -rf tmp.h5"
-    Shell.run(rm)
+    cleanup()
 
     return x[:,1], x[:,2] .+ 1im .* x[:,3]
 end
 
-function calc_dcConductivity(config::config; nw,num_random=1,num_moments=512,T,direction)
+function calc_dcConductivity(config::config; nw,num_random=1,num_moments=512,T,dir)
     nrand = num_random
     nmomt = num_moments
-    dir   = direction
     prefix = "tmp.h5"
+
+    println("Calculating DC Conductivity...")
 
     @suppress config.calc.conductivity_dc(num_points=nw, num_moments=nmomt, num_random=nrand,
                                 direction=dir, temperature=T)
@@ -139,10 +118,9 @@ function calc_dcConductivity(config::config; nw,num_random=1,num_moments=512,T,d
 
     x = readdlm("condDC.dat")
 
-    rm = "rm -rf condDC.dat"
-    Shell.run(rm)
-    rm = "rm -rf tmp.h5"
-    Shell.run(rm)
+    println("Done...!")
+
+    cleanup()
 
     return x[:,1], x[:,2], x[:,3]
 end
