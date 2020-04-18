@@ -1,5 +1,14 @@
 # PythTB.jl
 
+## IMPORTANT NOTICE
+
+THIS PACKAGE IS GONNA TO BE DEPRECATED, FOR FURTHER FUNCTIONALITY, PLEASE USE
+PYCALL INSTEAD.
+
+RECOMMENDED TIGHT BINDING PACKAGE IN PURE JULIA : [Quantica](https://github.com/pablosanjose/Quantica.jl/) (STILL IN DEVELOPMENT)
+
+##
+
 PythTB.jl is Julia Wrapper for established packages for Tight Binding that have been made.
 
 Current Implemented Packages:
@@ -98,27 +107,13 @@ plot(k_dist,eigvals')
 
 See more advanced examples in `examples` folder.
 
-## Changelog
-
-#### v0.2
-- add KITE and PyBinding for transport properties calculation.
-
-#### v0.15
-- add function documentation for PythTB functionality.
-
-#### v0.12
-- remake visualization in pure julia plots, instead pyplot.
-
-#### v0.1
-- add PythTB package with full functionality and examples.
-
 ## Acknowledgement
 All credits go to PythTB, PyBinding, and KITE developers.
 
 ## TO DO
 - add KITE packages (full functionality)
 - add PyBinding packages (full functionality)
-- make docker images for lazy deps installation
+- add Z2Pack packages
 
 ## Goal
 PythTB.jl aims to unify all functionality of established packages based on Tight Binding approach in JULIA!
